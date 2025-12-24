@@ -37,29 +37,21 @@ struct OpcodeTests {
 
         checkCPU(oldCPU,
                  extraCycles: 1,
-                 programCounter: 0x01,
-                 a: .unchanged,
-                 f: .unchanged,
-                 b: .unchanged,
-                 c: .unchanged,
-                 d: .unchanged,
-                 e: .unchanged,
-                 h: .unchanged,
-                 l: .unchanged)
+                 programCounter: 0x01)
     }
 
     func checkCPU(
         _ oldCPU: CPU,
         extraCycles: Int,
         programCounter: UInt16,
-        a: RegisterChange,
-        f: RegisterChange,
-        b: RegisterChange,
-        c: RegisterChange,
-        d: RegisterChange,
-        e: RegisterChange,
-        h: RegisterChange,
-        l: RegisterChange
+        a: RegisterChange = .unchanged,
+        f: RegisterChange = .unchanged,
+        b: RegisterChange = .unchanged,
+        c: RegisterChange = .unchanged,
+        d: RegisterChange = .unchanged,
+        e: RegisterChange = .unchanged,
+        h: RegisterChange = .unchanged,
+        l: RegisterChange = .unchanged
     ) {
         #expect(self.cpu.cycles == oldCPU.cycles + extraCycles)
         #expect(self.cpu.programCounter == programCounter)
