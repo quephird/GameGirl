@@ -15,8 +15,16 @@ public struct CPU {
     public var h: Register8 = 0x00
     public var l: Register8 = 0x00
 
-    public var sp: Register16 = 0x0000
-    public var pc: Register16 = 0x0000
+    public var stackPointer: Register16 = 0x0000
+    public var programCounter: Register16 = 0x0000
+
+    public var cycles: Int = 0
+
+    public var program: [UInt8] = []
+}
+
+enum CpuError: Error {
+    case unimplementedOpcode(UInt8)
 }
 
 extension CPU {
@@ -61,3 +69,37 @@ extension CPU {
     }
 }
 
+extension CPU {
+    mutating func readProgramByte() -> UInt8 {
+        // NOTA BENE: Perhaps later we can do some bounds checking
+        let byte = self.program[Int(self.programCounter)]
+        self.programCounter += 1
+        return byte
+    }
+
+    mutating func fetchOpcode() throws -> Opcode {
+        let byte = readProgramByte()
+
+        if let opcode = Opcode(rawValue: byte) {
+            return opcode
+        } else {
+            throw CpuError.unimplementedOpcode(byte)
+        }
+    }
+
+    mutating func execute(opcode: Opcode) {
+        switch opcode {
+        case .nop:
+            self.nop()
+        }
+    }
+
+    public mutating func executeInstruction() throws {
+        let opcode = try self.fetchOpcode()
+        self.execute(opcode: opcode)
+    }
+
+    mutating func nop() {
+        self.cycles += 1
+    }
+}
