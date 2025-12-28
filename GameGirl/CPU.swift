@@ -72,7 +72,7 @@ extension CPU {
 extension CPU {
     mutating func readProgramByte() -> UInt8 {
         // NOTA BENE: Perhaps later we can do some bounds checking
-        let byte = self.program[Int(self.programCounter)]
+        let byte = self.readMemory(address: self.programCounter)
         self.programCounter += 1
         return byte
     }
@@ -81,6 +81,16 @@ extension CPU {
         let lowByte = self.readProgramByte()
         let highByte = self.readProgramByte()
         return UInt16(highByte) << 8 | UInt16(lowByte)
+    }
+
+    // ACHTUNG!!!!! This is a temporary measure for now until
+    // we have a more robust understanding of memory and the bus.
+    func readMemory(address: UInt16) -> UInt8 {
+        self.program[Int(address)]
+    }
+
+    mutating func writeMemory(address: UInt16, byte: UInt8) {
+        self.program[Int(address)] = byte
     }
 
     mutating func fetchOpcode() throws -> Opcode {
@@ -93,24 +103,14 @@ extension CPU {
         }
     }
 
-    enum RegisterPairTarget: UInt8 {
-        case bc = 0b00
-        case de = 0b01
-        case hl = 0b10
-        case sp = 0b11
-
-        init?(opcode: Opcode) {
-            let rawValue = (opcode.rawValue & 0b0011_0000) >> 4
-            self.init(rawValue: rawValue)
-        }
-    }
-
     mutating func execute(opcode: Opcode) {
         switch opcode {
         case .nop:
             self.nop()
         case .ldBc, .ldDe, .ldHl, .ldSp:
-            self.load(target: RegisterPairTarget(opcode: opcode)!)
+            self.load(target: Opcode.Register16Target(opcode: opcode)!)
+        case .ldBcMem, .ldDeMem, .ldHlMemI, .ldHlMemD:
+            self.loadMemory(target: Opcode.IndirectMemoryTarget(opcode: opcode)!)
         }
     }
 
@@ -123,7 +123,7 @@ extension CPU {
         self.cycles += 1
     }
 
-    mutating func load(target: RegisterPairTarget) {
+    mutating func load(target: Opcode.Register16Target) {
         let word = self.readProgramWord()
 
         switch target {
@@ -138,5 +138,22 @@ extension CPU {
         }
 
         self.cycles += 3
+    }
+
+    mutating func loadMemory(target: Opcode.IndirectMemoryTarget) {
+        switch target {
+        case .bc:
+            writeMemory(address: self.bc, byte: self.a)
+        case .de:
+            writeMemory(address: self.de, byte: self.a)
+        case .hli:
+            writeMemory(address: self.hl, byte: self.a)
+            self.hl += 1
+        case .hld:
+            writeMemory(address: self.hl, byte: self.a)
+            self.hl -= 1
+        }
+
+        self.cycles += 2
     }
 }

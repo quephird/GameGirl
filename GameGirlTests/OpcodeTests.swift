@@ -42,9 +42,9 @@ struct OpcodeTests {
     var cpu = CPU()
 
     @Test mutating func nop() async throws {
+        self.cpu.setProgram(program: [0x00])
         let oldCPU = self.cpu
 
-        self.cpu.setProgram(program: [0x00])
         try self.cpu.executeInstruction()
 
         checkCPU(oldCPU,
@@ -53,9 +53,9 @@ struct OpcodeTests {
     }
 
     @Test mutating func ldBc() async throws {
+        self.cpu.setProgram(program: [0x01, 0x34, 0x12])
         let oldCPU = self.cpu
 
-        self.cpu.setProgram(program: [0x01, 0x34, 0x12])
         try self.cpu.executeInstruction()
 
         checkCPU(oldCPU,
@@ -66,9 +66,9 @@ struct OpcodeTests {
     }
 
     @Test mutating func ldDe() async throws {
+        self.cpu.setProgram(program: [0x11, 0x34, 0x12])
         let oldCPU = self.cpu
 
-        self.cpu.setProgram(program: [0x11, 0x34, 0x12])
         try self.cpu.executeInstruction()
 
         checkCPU(oldCPU,
@@ -79,9 +79,9 @@ struct OpcodeTests {
     }
 
     @Test mutating func ldHl() async throws {
+        self.cpu.setProgram(program: [0x21, 0x34, 0x12])
         let oldCPU = self.cpu
 
-        self.cpu.setProgram(program: [0x21, 0x34, 0x12])
         try self.cpu.executeInstruction()
 
         checkCPU(oldCPU,
@@ -92,9 +92,9 @@ struct OpcodeTests {
     }
 
     @Test mutating func ldSp() async throws {
+        self.cpu.setProgram(program: [0x31, 0x34, 0x12])
         let oldCPU = self.cpu
 
-        self.cpu.setProgram(program: [0x31, 0x34, 0x12])
         try self.cpu.executeInstruction()
 
         checkCPU(oldCPU,
@@ -103,7 +103,66 @@ struct OpcodeTests {
                  stackPointer: .newValue(0x1234))
     }
 
+    @Test mutating func ldBcMem() async throws {
+        self.cpu.bc = 0x0003
+        self.cpu.a = 0x42
+        self.cpu.setProgram(program: [0x02, 0x00, 0x00, 0x00])
+        let oldCPU = self.cpu
 
+        try self.cpu.executeInstruction()
+
+        checkCPU(oldCPU,
+                 extraCycles: 2,
+                 programCounter: 0x0001,
+                 memoryChanges: [0x0003 : 0x42])
+    }
+
+    @Test mutating func ldDeMem() async throws {
+        self.cpu.de = 0x0003
+        self.cpu.a = 0x42
+        self.cpu.setProgram(program: [0x12, 0x00, 0x00, 0x00])
+        let oldCPU = self.cpu
+
+        try self.cpu.executeInstruction()
+
+        checkCPU(oldCPU,
+                 extraCycles: 2,
+                 programCounter: 0x0001,
+                 memoryChanges: [0x0003 : 0x42])
+    }
+
+
+    @Test mutating func ldHlMemI() async throws {
+        self.cpu.hl = 0x0003
+        self.cpu.a = 0x42
+        self.cpu.setProgram(program: [0x22, 0x00, 0x00, 0x00])
+        let oldCPU = self.cpu
+
+        try self.cpu.executeInstruction()
+
+        checkCPU(oldCPU,
+                 extraCycles: 2,
+                 programCounter: 0x0001,
+                 h: .unchanged,
+                 l: .newValue(0x04),
+                 memoryChanges: [0x0003 : 0x42])
+    }
+
+    @Test mutating func ldHlMemD() async throws {
+        self.cpu.hl = 0x0003
+        self.cpu.a = 0x42
+        self.cpu.setProgram(program: [0x32, 0x00, 0x00, 0x00])
+        let oldCPU = self.cpu
+
+        try self.cpu.executeInstruction()
+
+        checkCPU(oldCPU,
+                 extraCycles: 2,
+                 programCounter: 0x0001,
+                 h: .unchanged,
+                 l: .newValue(0x02),
+                 memoryChanges: [0x0003 : 0x42])
+    }
 
     func checkCPU(
         _ oldCPU: CPU,
@@ -117,7 +176,8 @@ struct OpcodeTests {
         d: RegisterChange = .unchanged,
         e: RegisterChange = .unchanged,
         h: RegisterChange = .unchanged,
-        l: RegisterChange = .unchanged
+        l: RegisterChange = .unchanged,
+        memoryChanges: [UInt16 : UInt8] = [:]
     ) {
         #expect(self.cpu.cycles == oldCPU.cycles + extraCycles)
         #expect(self.cpu.programCounter == programCounter)
@@ -130,5 +190,13 @@ struct OpcodeTests {
         #expect(self.cpu.e == e.getValue(oldValue: oldCPU.e))
         #expect(self.cpu.h == h.getValue(oldValue: oldCPU.h))
         #expect(self.cpu.l == l.getValue(oldValue: oldCPU.l))
+
+        for address in self.cpu.program.indices {
+            if let newValue = memoryChanges[UInt16(address)] {
+                #expect(self.cpu.program[address] == newValue)
+            } else {
+                #expect(self.cpu.program[address] == oldCPU.program[address])
+            }
+        }
     }
 }
