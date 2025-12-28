@@ -77,6 +77,12 @@ extension CPU {
         return byte
     }
 
+    mutating func readProgramWord() -> UInt16 {
+        let lowByte = self.readProgramByte()
+        let highByte = self.readProgramByte()
+        return UInt16(highByte) << 8 | UInt16(lowByte)
+    }
+
     mutating func fetchOpcode() throws -> Opcode {
         let byte = readProgramByte()
 
@@ -87,10 +93,24 @@ extension CPU {
         }
     }
 
+    enum RegisterPairTarget: UInt8 {
+        case bc = 0b00
+        case de = 0b01
+        case hl = 0b10
+        case sp = 0b11
+
+        init?(opcode: Opcode) {
+            let rawValue = (opcode.rawValue & 0b0011_0000) >> 4
+            self.init(rawValue: rawValue)
+        }
+    }
+
     mutating func execute(opcode: Opcode) {
         switch opcode {
         case .nop:
             self.nop()
+        case .ldBc, .ldDe, .ldHl, .ldSp:
+            self.load(target: RegisterPairTarget(opcode: opcode)!)
         }
     }
 
@@ -101,5 +121,22 @@ extension CPU {
 
     mutating func nop() {
         self.cycles += 1
+    }
+
+    mutating func load(target: RegisterPairTarget) {
+        let word = self.readProgramWord()
+
+        switch target {
+        case .bc:
+            self.bc = word
+        case .de:
+            self.de = word
+        case .hl:
+            self.hl = word
+        case .sp:
+            self.stackPointer = word
+        }
+
+        self.cycles += 3
     }
 }
