@@ -7,15 +7,18 @@
 
 enum Opcode: UInt8 {
     case nop = 0x00
-    case ldBc = 0x01
-    case ldBcMem = 0x02
-    case ldDe = 0x11
-    case ldDeMem = 0x12
-    case ldHl = 0x21
-    case ldHlMemI = 0x22
-    case ldSp = 0x31
-    case ldHlMemD = 0x32
-
+    case ldBCFromImmediate = 0x01
+    case ldBCIndirectFromA = 0x02
+    case ldAFromBCIndirect = 0x0A
+    case ldDEFromImmediate = 0x11
+    case ldDEIndirectFromA = 0x12
+    case ldAFromDEIndirect = 0x1A
+    case ldHLFromImmediate = 0x21
+    case ldHLIndirectFromAAndIncrement = 0x22
+    case ldAFromHLIndirectAndIncrement = 0x2A
+    case ldSPFromImmediate = 0x31
+    case ldHLIndirectFromAAndDecrement = 0x32
+    case ldAFromHLIndirectAndDecrement = 0x3A
 }
 
 extension Opcode {
@@ -49,8 +52,9 @@ extension Opcode {
     var bytes: Int {
         switch self {
         case .nop: 1
-        case .ldBc, .ldDe, .ldHl, .ldSp: 3
-        case .ldBcMem, .ldDeMem, .ldHlMemI, .ldHlMemD: 1
+        case .ldBCFromImmediate, .ldDEFromImmediate, .ldHLFromImmediate, .ldSPFromImmediate: 3
+        case .ldBCIndirectFromA, .ldDEIndirectFromA, .ldHLIndirectFromAAndIncrement, .ldHLIndirectFromAAndDecrement: 1
+        case .ldAFromBCIndirect, .ldAFromDEIndirect, .ldAFromHLIndirectAndIncrement, .ldAFromHLIndirectAndDecrement: 1
         }
     }
 }
@@ -59,8 +63,9 @@ extension Opcode {
     var cycles: Int {
         switch self {
         case .nop: 1
-        case .ldBc, .ldDe, .ldHl, .ldSp: 3
-        case .ldBcMem, .ldDeMem, .ldHlMemI, .ldHlMemD: 2
+        case .ldBCFromImmediate, .ldDEFromImmediate, .ldHLFromImmediate, .ldSPFromImmediate: 3
+        case .ldBCIndirectFromA, .ldDEIndirectFromA, .ldHLIndirectFromAAndIncrement, .ldHLIndirectFromAAndDecrement: 2
+        case .ldAFromBCIndirect, .ldAFromDEIndirect, .ldAFromHLIndirectAndIncrement, .ldAFromHLIndirectAndDecrement: 2
         }
     }
 }

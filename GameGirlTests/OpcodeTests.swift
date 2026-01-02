@@ -52,7 +52,7 @@ struct OpcodeTests {
                  programCounter: 0x0001)
     }
 
-    @Test mutating func ldBc() async throws {
+    @Test mutating func ldBCFromImmediate() async throws {
         self.cpu.setProgram(program: [0x01, 0x34, 0x12])
         let oldCPU = self.cpu
 
@@ -65,7 +65,7 @@ struct OpcodeTests {
                  c: .newValue(0x34))
     }
 
-    @Test mutating func ldDe() async throws {
+    @Test mutating func ldDEFromImmediate() async throws {
         self.cpu.setProgram(program: [0x11, 0x34, 0x12])
         let oldCPU = self.cpu
 
@@ -78,7 +78,7 @@ struct OpcodeTests {
                  e: .newValue(0x34))
     }
 
-    @Test mutating func ldHl() async throws {
+    @Test mutating func ldHLFromImmediate() async throws {
         self.cpu.setProgram(program: [0x21, 0x34, 0x12])
         let oldCPU = self.cpu
 
@@ -91,7 +91,7 @@ struct OpcodeTests {
                  l: .newValue(0x34))
     }
 
-    @Test mutating func ldSp() async throws {
+    @Test mutating func ldSPFromImmediate() async throws {
         self.cpu.setProgram(program: [0x31, 0x34, 0x12])
         let oldCPU = self.cpu
 
@@ -103,7 +103,7 @@ struct OpcodeTests {
                  stackPointer: .newValue(0x1234))
     }
 
-    @Test mutating func ldBcMem() async throws {
+    @Test mutating func ldBCIndirectFromA() async throws {
         self.cpu.bc = 0x0003
         self.cpu.a = 0x42
         self.cpu.setProgram(program: [0x02, 0x00, 0x00, 0x00])
@@ -117,7 +117,7 @@ struct OpcodeTests {
                  memoryChanges: [0x0003 : 0x42])
     }
 
-    @Test mutating func ldDeMem() async throws {
+    @Test mutating func ldDEIndirectFromA() async throws {
         self.cpu.de = 0x0003
         self.cpu.a = 0x42
         self.cpu.setProgram(program: [0x12, 0x00, 0x00, 0x00])
@@ -132,7 +132,7 @@ struct OpcodeTests {
     }
 
 
-    @Test mutating func ldHlMemI() async throws {
+    @Test mutating func ldHLIndirectFromAAndIncrement() async throws {
         self.cpu.hl = 0x0003
         self.cpu.a = 0x42
         self.cpu.setProgram(program: [0x22, 0x00, 0x00, 0x00])
@@ -148,7 +148,7 @@ struct OpcodeTests {
                  memoryChanges: [0x0003 : 0x42])
     }
 
-    @Test mutating func ldHlMemD() async throws {
+    @Test mutating func ldHLIndirectFromAAndDecrement() async throws {
         self.cpu.hl = 0x0003
         self.cpu.a = 0x42
         self.cpu.setProgram(program: [0x32, 0x00, 0x00, 0x00])
@@ -162,6 +162,62 @@ struct OpcodeTests {
                  h: .unchanged,
                  l: .newValue(0x02),
                  memoryChanges: [0x0003 : 0x42])
+    }
+
+    @Test mutating func ldAFromBCIndirect() async throws {
+        self.cpu.bc = 0x0003
+        self.cpu.setProgram(program: [0x0A, 0x00, 0x00, 0x42])
+        let oldCPU = self.cpu
+
+        try self.cpu.executeInstruction()
+
+        checkCPU(oldCPU,
+                 extraCycles: 2,
+                 programCounter: 0x0001,
+                 a: .newValue(0x42))
+    }
+
+    @Test mutating func ldAFromDEIndirect() async throws {
+        self.cpu.de = 0x0003
+        self.cpu.setProgram(program: [0x1A, 0x00, 0x00, 0x42])
+        let oldCPU = self.cpu
+
+        try self.cpu.executeInstruction()
+
+        checkCPU(oldCPU,
+                 extraCycles: 2,
+                 programCounter: 0x0001,
+                 a: .newValue(0x42))
+    }
+
+    @Test mutating func ldAFromHLIndirectAndIncrement() async throws {
+        self.cpu.hl = 0x0003
+        self.cpu.setProgram(program: [0x2A, 0x00, 0x00, 0x42])
+        let oldCPU = self.cpu
+
+        try self.cpu.executeInstruction()
+
+        checkCPU(oldCPU,
+                 extraCycles: 2,
+                 programCounter: 0x0001,
+                 a: .newValue(0x42),
+                 h: .unchanged,
+                 l: .newValue(0x04))
+    }
+
+    @Test mutating func ldAFromHLIndirectAndDecrement() async throws {
+        self.cpu.hl = 0x0003
+        self.cpu.setProgram(program: [0x3A, 0x00, 0x00, 0x42])
+        let oldCPU = self.cpu
+
+        try self.cpu.executeInstruction()
+
+        checkCPU(oldCPU,
+                 extraCycles: 2,
+                 programCounter: 0x0001,
+                 a: .newValue(0x42),
+                 h: .unchanged,
+                 l: .newValue(0x02))
     }
 
     func checkCPU(

@@ -107,16 +107,20 @@ extension CPU {
         switch opcode {
         case .nop:
             self.nop()
-        case .ldBc, .ldDe, .ldHl, .ldSp:
+        case .ldBCFromImmediate, .ldDEFromImmediate, .ldHLFromImmediate, .ldSPFromImmediate:
             self.load(target: Opcode.Register16Target(opcode: opcode)!)
-        case .ldBcMem, .ldDeMem, .ldHlMemI, .ldHlMemD:
+        case .ldBCIndirectFromA, .ldDEIndirectFromA, .ldHLIndirectFromAAndIncrement, .ldHLIndirectFromAAndDecrement:
             self.loadMemory(target: Opcode.IndirectMemoryTarget(opcode: opcode)!)
+        case .ldAFromBCIndirect, .ldAFromDEIndirect, .ldAFromHLIndirectAndIncrement, .ldAFromHLIndirectAndDecrement:
+            self.loadAFromMemory(target: Opcode.IndirectMemoryTarget(opcode: opcode)!)
         }
     }
 
     public mutating func executeInstruction() throws {
         let opcode = try self.fetchOpcode()
+        let oldCycles = self.cycles
         self.execute(opcode: opcode)
+        assert(self.cycles - oldCycles == opcode.cycles, "The cycle count for this instruction is off: \(opcode)")
     }
 
     mutating func nop() {
@@ -143,14 +147,31 @@ extension CPU {
     mutating func loadMemory(target: Opcode.IndirectMemoryTarget) {
         switch target {
         case .bc:
-            writeMemory(address: self.bc, byte: self.a)
+            self.writeMemory(address: self.bc, byte: self.a)
         case .de:
-            writeMemory(address: self.de, byte: self.a)
+            self.writeMemory(address: self.de, byte: self.a)
         case .hli:
-            writeMemory(address: self.hl, byte: self.a)
+            self.writeMemory(address: self.hl, byte: self.a)
             self.hl += 1
         case .hld:
-            writeMemory(address: self.hl, byte: self.a)
+            self.writeMemory(address: self.hl, byte: self.a)
+            self.hl -= 1
+        }
+
+        self.cycles += 2
+    }
+
+    mutating func loadAFromMemory(target: Opcode.IndirectMemoryTarget) {
+        switch target {
+        case .bc:
+            self.a = readMemory(address: self.bc)
+        case .de:
+            self.a = readMemory(address: self.de)
+        case .hli:
+            self.a = readMemory(address: self.hl)
+            self.hl += 1
+        case .hld:
+            self.a = readMemory(address: self.hl)
             self.hl -= 1
         }
 
