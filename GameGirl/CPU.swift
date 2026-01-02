@@ -15,8 +15,8 @@ public struct CPU {
     public var h: Register8 = 0x00
     public var l: Register8 = 0x00
 
-    public var stackPointer: Register16 = 0x0000
-    public var programCounter: Register16 = 0x0000
+    public var sp: Register16 = 0x0000
+    public var pc: Register16 = 0x0000
 
     public var cycles: Int = 0
 
@@ -33,8 +33,8 @@ extension CPU {
             UInt16(self.a) << 8 | UInt16(self.f)
         }
         set {
-            self.a = Register8(newValue >> 8)
-            self.f = Register8(newValue & 0xFF)
+            self.a = Register8(newValue.high)
+            self.f = Register8(newValue.low)
         }
     }
 
@@ -43,8 +43,8 @@ extension CPU {
             UInt16(self.b) << 8 | UInt16(self.c)
         }
         set {
-            self.b = Register8(newValue >> 8)
-            self.c = Register8(newValue & 0xFF)
+            self.b = Register8(newValue.high)
+            self.c = Register8(newValue.low)
         }
     }
 
@@ -53,8 +53,8 @@ extension CPU {
             UInt16(self.d) << 8 | UInt16(self.e)
         }
         set {
-            self.d = Register8(newValue >> 8)
-            self.e = Register8(newValue & 0xFF)
+            self.d = Register8(newValue.high)
+            self.e = Register8(newValue.low)
         }
     }
 
@@ -63,8 +63,8 @@ extension CPU {
             UInt16(self.h) << 8 | UInt16(self.l)
         }
         set {
-            self.h = Register8(newValue >> 8)
-            self.l = Register8(newValue & 0xFF)
+            self.h = Register8(newValue.high)
+            self.l = Register8(newValue.low)
         }
     }
 }
@@ -72,8 +72,8 @@ extension CPU {
 extension CPU {
     mutating func readProgramByte() -> UInt8 {
         // NOTA BENE: Perhaps later we can do some bounds checking
-        let byte = self.readMemory(address: self.programCounter)
-        self.programCounter += 1
+        let byte = self.readMemory(address: self.pc)
+        self.pc += 1
         return byte
     }
 
@@ -111,6 +111,8 @@ extension CPU {
             self.load(target: Opcode.Register16Target(opcode: opcode)!)
         case .ldBCIndirectFromA, .ldDEIndirectFromA, .ldHLIndirectFromAAndIncrement, .ldHLIndirectFromAAndDecrement:
             self.loadMemory(target: Opcode.IndirectMemoryTarget(opcode: opcode)!)
+        case .ldImmediateIndirectFromSP:
+            self.loadMemoryFromSP()
         case .ldAFromBCIndirect, .ldAFromDEIndirect, .ldAFromHLIndirectAndIncrement, .ldAFromHLIndirectAndDecrement:
             self.loadAFromMemory(target: Opcode.IndirectMemoryTarget(opcode: opcode)!)
         }
@@ -138,7 +140,7 @@ extension CPU {
         case .hl:
             self.hl = word
         case .sp:
-            self.stackPointer = word
+            self.sp = word
         }
 
         self.cycles += 3
@@ -176,5 +178,13 @@ extension CPU {
         }
 
         self.cycles += 2
+    }
+
+    mutating func loadMemoryFromSP() {
+        let address = self.readProgramWord()
+        self.writeMemory(address: address, byte: self.sp.low)
+        self.writeMemory(address: address+1, byte: self.sp.high)
+
+        self.cycles += 5
     }
 }

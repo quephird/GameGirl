@@ -49,7 +49,7 @@ struct OpcodeTests {
 
         checkCPU(oldCPU,
                  extraCycles: 1,
-                 programCounter: 0x0001)
+                 pc: 0x0001)
     }
 
     @Test mutating func ldBCFromImmediate() async throws {
@@ -60,7 +60,7 @@ struct OpcodeTests {
 
         checkCPU(oldCPU,
                  extraCycles: 3,
-                 programCounter: 0x0003,
+                 pc: 0x0003,
                  b: .newValue(0x12),
                  c: .newValue(0x34))
     }
@@ -73,7 +73,7 @@ struct OpcodeTests {
 
         checkCPU(oldCPU,
                  extraCycles: 3,
-                 programCounter: 0x0003,
+                 pc: 0x0003,
                  d: .newValue(0x12),
                  e: .newValue(0x34))
     }
@@ -86,7 +86,7 @@ struct OpcodeTests {
 
         checkCPU(oldCPU,
                  extraCycles: 3,
-                 programCounter: 0x0003,
+                 pc: 0x0003,
                  h: .newValue(0x12),
                  l: .newValue(0x34))
     }
@@ -99,8 +99,8 @@ struct OpcodeTests {
 
         checkCPU(oldCPU,
                  extraCycles: 3,
-                 programCounter: 0x0003,
-                 stackPointer: .newValue(0x1234))
+                 pc: 0x0003,
+                 sp: .newValue(0x1234))
     }
 
     @Test mutating func ldBCIndirectFromA() async throws {
@@ -113,7 +113,7 @@ struct OpcodeTests {
 
         checkCPU(oldCPU,
                  extraCycles: 2,
-                 programCounter: 0x0001,
+                 pc: 0x0001,
                  memoryChanges: [0x0003 : 0x42])
     }
 
@@ -127,7 +127,7 @@ struct OpcodeTests {
 
         checkCPU(oldCPU,
                  extraCycles: 2,
-                 programCounter: 0x0001,
+                 pc: 0x0001,
                  memoryChanges: [0x0003 : 0x42])
     }
 
@@ -142,7 +142,7 @@ struct OpcodeTests {
 
         checkCPU(oldCPU,
                  extraCycles: 2,
-                 programCounter: 0x0001,
+                 pc: 0x0001,
                  h: .unchanged,
                  l: .newValue(0x04),
                  memoryChanges: [0x0003 : 0x42])
@@ -158,7 +158,7 @@ struct OpcodeTests {
 
         checkCPU(oldCPU,
                  extraCycles: 2,
-                 programCounter: 0x0001,
+                 pc: 0x0001,
                  h: .unchanged,
                  l: .newValue(0x02),
                  memoryChanges: [0x0003 : 0x42])
@@ -173,7 +173,7 @@ struct OpcodeTests {
 
         checkCPU(oldCPU,
                  extraCycles: 2,
-                 programCounter: 0x0001,
+                 pc: 0x0001,
                  a: .newValue(0x42))
     }
 
@@ -186,7 +186,7 @@ struct OpcodeTests {
 
         checkCPU(oldCPU,
                  extraCycles: 2,
-                 programCounter: 0x0001,
+                 pc: 0x0001,
                  a: .newValue(0x42))
     }
 
@@ -199,7 +199,7 @@ struct OpcodeTests {
 
         checkCPU(oldCPU,
                  extraCycles: 2,
-                 programCounter: 0x0001,
+                 pc: 0x0001,
                  a: .newValue(0x42),
                  h: .unchanged,
                  l: .newValue(0x04))
@@ -214,17 +214,33 @@ struct OpcodeTests {
 
         checkCPU(oldCPU,
                  extraCycles: 2,
-                 programCounter: 0x0001,
+                 pc: 0x0001,
                  a: .newValue(0x42),
                  h: .unchanged,
                  l: .newValue(0x02))
     }
 
+    @Test mutating func ldImmediateIndirectFromSP() async throws {
+        self.cpu.sp = 0x1234
+        self.cpu.setProgram(program: [0x08, 0x03, 0x00, 0x00, 0x00])
+        let oldCPU = self.cpu
+
+        try self.cpu.executeInstruction()
+
+        checkCPU(oldCPU,
+                 extraCycles: 5,
+                 pc: 0x0003,
+                 memoryChanges: [
+                    0x0003 : 0x34,
+                    0x0004 : 0x12
+                 ])
+    }
+
     func checkCPU(
         _ oldCPU: CPU,
         extraCycles: Int,
-        programCounter: UInt16,
-        stackPointer: RegisterPairChange = .unchanged,
+        pc: UInt16,
+        sp: RegisterPairChange = .unchanged,
         a: RegisterChange = .unchanged,
         f: RegisterChange = .unchanged,
         b: RegisterChange = .unchanged,
@@ -236,8 +252,8 @@ struct OpcodeTests {
         memoryChanges: [UInt16 : UInt8] = [:]
     ) {
         #expect(self.cpu.cycles == oldCPU.cycles + extraCycles)
-        #expect(self.cpu.programCounter == programCounter)
-        #expect(self.cpu.stackPointer == stackPointer.getValue(oldValue: oldCPU.stackPointer))
+        #expect(self.cpu.pc == pc)
+        #expect(self.cpu.sp == sp.getValue(oldValue: oldCPU.sp))
         #expect(self.cpu.a == a.getValue(oldValue: oldCPU.a))
         #expect(self.cpu.f == f.getValue(oldValue: oldCPU.f))
         #expect(self.cpu.b == b.getValue(oldValue: oldCPU.b))

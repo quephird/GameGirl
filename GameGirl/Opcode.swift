@@ -9,6 +9,7 @@ enum Opcode: UInt8 {
     case nop = 0x00
     case ldBCFromImmediate = 0x01
     case ldBCIndirectFromA = 0x02
+    case ldImmediateIndirectFromSP = 0x08
     case ldAFromBCIndirect = 0x0A
     case ldDEFromImmediate = 0x11
     case ldDEIndirectFromA = 0x12
@@ -54,6 +55,7 @@ extension Opcode {
         case .nop: 1
         case .ldBCFromImmediate, .ldDEFromImmediate, .ldHLFromImmediate, .ldSPFromImmediate: 3
         case .ldBCIndirectFromA, .ldDEIndirectFromA, .ldHLIndirectFromAAndIncrement, .ldHLIndirectFromAAndDecrement: 1
+        case .ldImmediateIndirectFromSP: 3
         case .ldAFromBCIndirect, .ldAFromDEIndirect, .ldAFromHLIndirectAndIncrement, .ldAFromHLIndirectAndDecrement: 1
         }
     }
@@ -65,6 +67,7 @@ extension Opcode {
         case .nop: 1
         case .ldBCFromImmediate, .ldDEFromImmediate, .ldHLFromImmediate, .ldSPFromImmediate: 3
         case .ldBCIndirectFromA, .ldDEIndirectFromA, .ldHLIndirectFromAAndIncrement, .ldHLIndirectFromAAndDecrement: 2
+        case .ldImmediateIndirectFromSP: 5
         case .ldAFromBCIndirect, .ldAFromDEIndirect, .ldAFromHLIndirectAndIncrement, .ldAFromHLIndirectAndDecrement: 2
         }
     }
