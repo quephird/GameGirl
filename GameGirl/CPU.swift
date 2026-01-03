@@ -111,6 +111,8 @@ extension CPU {
             self.load(target: Opcode.Register16Target(opcode: opcode)!)
         case .ldBCIndirectFromA, .ldDEIndirectFromA, .ldHLIndirectFromAAndIncrement, .ldHLIndirectFromAAndDecrement:
             self.loadMemory(target: Opcode.IndirectMemoryTarget(opcode: opcode)!)
+        case .incBC, .incDE, .incHL, .incSP:
+            self.incrementRegister(target: Opcode.Register16Target(opcode: opcode)!)
         case .ldImmediateIndirectFromSP:
             self.loadMemoryFromSP()
         case .ldAFromBCIndirect, .ldAFromDEIndirect, .ldAFromHLIndirectAndIncrement, .ldAFromHLIndirectAndDecrement:
@@ -186,5 +188,20 @@ extension CPU {
         self.writeMemory(address: address+1, byte: self.sp.high)
 
         self.cycles += 5
+    }
+
+    mutating func incrementRegister(target: Opcode.Register16Target) {
+        switch target {
+        case .bc:
+            self.bc &+= 1
+        case .de:
+            self.de &+= 1
+        case .hl:
+            self.hl &+= 1
+        case .sp:
+            self.sp &+= 1
+        }
+
+        self.cycles += 2
     }
 }

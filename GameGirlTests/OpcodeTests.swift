@@ -236,6 +236,61 @@ struct OpcodeTests {
                  ])
     }
 
+    @Test mutating func incBC() async throws {
+        self.cpu.bc = 0x1234
+        self.cpu.setProgram(program: [0x03])
+        let oldCPU = self.cpu
+
+        try self.cpu.executeInstruction()
+
+        checkCPU(oldCPU,
+                 extraCycles: 2,
+                 pc: 0x0001,
+                 b: .unchanged,
+                 c: .newValue(0x35))
+    }
+
+    @Test mutating func incDE() async throws {
+        self.cpu.de = 0x1234
+        self.cpu.setProgram(program: [0x13])
+        let oldCPU = self.cpu
+
+        try self.cpu.executeInstruction()
+
+        checkCPU(oldCPU,
+                 extraCycles: 2,
+                 pc: 0x0001,
+                 d: .unchanged,
+                 e: .newValue(0x35))
+    }
+
+    @Test mutating func incHL() async throws {
+        self.cpu.hl = 0xffff
+        self.cpu.setProgram(program: [0x23])
+        let oldCPU = self.cpu
+
+        try self.cpu.executeInstruction()
+
+        checkCPU(oldCPU,
+                 extraCycles: 2,
+                 pc: 0x0001,
+                 h: .newValue(0x00),
+                 l: .newValue(0x00))
+    }
+
+    @Test mutating func incSP() async throws {
+        self.cpu.sp = 0x1234
+        self.cpu.setProgram(program: [0x33])
+        let oldCPU = self.cpu
+
+        try self.cpu.executeInstruction()
+
+        checkCPU(oldCPU,
+                 extraCycles: 2,
+                 pc: 0x0001,
+                 sp: .newValue(0x1235))
+    }
+
     func checkCPU(
         _ oldCPU: CPU,
         extraCycles: Int,

@@ -9,16 +9,20 @@ enum Opcode: UInt8 {
     case nop = 0x00
     case ldBCFromImmediate = 0x01
     case ldBCIndirectFromA = 0x02
+    case incBC = 0x03
     case ldImmediateIndirectFromSP = 0x08
     case ldAFromBCIndirect = 0x0A
     case ldDEFromImmediate = 0x11
     case ldDEIndirectFromA = 0x12
+    case incDE = 0x13
     case ldAFromDEIndirect = 0x1A
     case ldHLFromImmediate = 0x21
     case ldHLIndirectFromAAndIncrement = 0x22
     case ldAFromHLIndirectAndIncrement = 0x2A
+    case incHL = 0x23
     case ldSPFromImmediate = 0x31
     case ldHLIndirectFromAAndDecrement = 0x32
+    case incSP = 0x33
     case ldAFromHLIndirectAndDecrement = 0x3A
 }
 
@@ -55,6 +59,7 @@ extension Opcode {
         case .nop: 1
         case .ldBCFromImmediate, .ldDEFromImmediate, .ldHLFromImmediate, .ldSPFromImmediate: 3
         case .ldBCIndirectFromA, .ldDEIndirectFromA, .ldHLIndirectFromAAndIncrement, .ldHLIndirectFromAAndDecrement: 1
+        case .incBC, .incDE, .incHL, .incSP: 1
         case .ldImmediateIndirectFromSP: 3
         case .ldAFromBCIndirect, .ldAFromDEIndirect, .ldAFromHLIndirectAndIncrement, .ldAFromHLIndirectAndDecrement: 1
         }
@@ -67,6 +72,7 @@ extension Opcode {
         case .nop: 1
         case .ldBCFromImmediate, .ldDEFromImmediate, .ldHLFromImmediate, .ldSPFromImmediate: 3
         case .ldBCIndirectFromA, .ldDEIndirectFromA, .ldHLIndirectFromAAndIncrement, .ldHLIndirectFromAAndDecrement: 2
+        case .incBC, .incDE, .incHL, .incSP: 2
         case .ldImmediateIndirectFromSP: 5
         case .ldAFromBCIndirect, .ldAFromDEIndirect, .ldAFromHLIndirectAndIncrement, .ldAFromHLIndirectAndDecrement: 2
         }
