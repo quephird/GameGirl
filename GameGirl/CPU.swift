@@ -117,6 +117,8 @@ extension CPU {
             self.loadMemoryFromSP()
         case .ldAFromBCIndirect, .ldAFromDEIndirect, .ldAFromHLIndirectAndIncrement, .ldAFromHLIndirectAndDecrement:
             self.loadAFromMemory(target: Opcode.IndirectMemoryTarget(opcode: opcode)!)
+        case .decBC, .decDE, .decHL, .decSP:
+            self.decrementRegister(target: Opcode.Register16Target(opcode: opcode)!)
         }
     }
 
@@ -200,6 +202,21 @@ extension CPU {
             self.hl &+= 1
         case .sp:
             self.sp &+= 1
+        }
+
+        self.cycles += 2
+    }
+
+    mutating func decrementRegister(target: Opcode.Register16Target) {
+        switch target {
+        case .bc:
+            self.bc &-= 1
+        case .de:
+            self.de &-= 1
+        case .hl:
+            self.hl &-= 1
+        case .sp:
+            self.sp &-= 1
         }
 
         self.cycles += 2
