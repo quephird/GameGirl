@@ -346,6 +346,69 @@ struct OpcodeTests {
                  sp: .newValue(0x1233))
     }
 
+    @Test mutating func addBCToHL() async throws {
+        self.cpu.bc = 0x0102
+        self.cpu.hl = 0x0304
+        self.cpu.setProgram(program: [0x09])
+        let oldCPU = self.cpu
+
+        try self.cpu.executeInstruction()
+
+        checkCPU(oldCPU,
+                 extraCycles: 2,
+                 pc: 0x0001,
+                 f: .unchanged,
+                 h: .newValue(0x04),
+                 l: .newValue(0x06))
+    }
+
+    @Test mutating func addDEToHL() async throws {
+        self.cpu.de = 0x0F01
+        self.cpu.hl = 0x0102
+        self.cpu.setProgram(program: [0x19])
+        let oldCPU = self.cpu
+
+        try self.cpu.executeInstruction()
+
+        checkCPU(oldCPU,
+                 extraCycles: 2,
+                 pc: 0x0001,
+                 f: .newValue(RegisterBit.halfCarry.value),
+                 h: .newValue(0x10),
+                 l: .newValue(0x03))
+    }
+
+    @Test mutating func addHLToHL() async throws {
+        self.cpu.hl = 0x7FFF
+        self.cpu.setProgram(program: [0x29])
+        let oldCPU = self.cpu
+
+        try self.cpu.executeInstruction()
+
+        checkCPU(oldCPU,
+                 extraCycles: 2,
+                 pc: 0x0001,
+                 f: .newValue(RegisterBit.halfCarry.value),
+                 h: .newValue(0xFF),
+                 l: .newValue(0xFE))
+    }
+
+    @Test mutating func addSPToHL() async throws {
+        self.cpu.sp = 0x0001
+        self.cpu.hl = 0xFFFF
+        self.cpu.setProgram(program: [0x39])
+        let oldCPU = self.cpu
+
+        try self.cpu.executeInstruction()
+
+        checkCPU(oldCPU,
+                 extraCycles: 2,
+                 pc: 0x0001,
+                 f: .newValue(RegisterBit.halfCarry.value ^ RegisterBit.carry.value),
+                 h: .newValue(0x00),
+                 l: .newValue(0x00))
+    }
+
     func checkCPU(
         _ oldCPU: CPU,
         extraCycles: Int,

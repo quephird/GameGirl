@@ -23,4 +23,8 @@ public enum RegisterBit {
             7
         }
     }
+
+    var value: UInt8 {
+        1 << self.bitIndex
+    }
 }

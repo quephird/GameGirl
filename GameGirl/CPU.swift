@@ -115,6 +115,8 @@ extension CPU {
             self.incrementRegister(target: Opcode.Register16Target(opcode: opcode)!)
         case .ldImmediateIndirectFromSP:
             self.loadMemoryFromSP()
+        case .addBCToHL, .addDEToHL, .addHLToHL, .addSPToHL:
+            self.addToHL(from: Opcode.Register16Target(opcode: opcode)!)
         case .ldAFromBCIndirect, .ldAFromDEIndirect, .ldAFromHLIndirectAndIncrement, .ldAFromHLIndirectAndDecrement:
             self.loadAFromMemory(target: Opcode.IndirectMemoryTarget(opcode: opcode)!)
         case .decBC, .decDE, .decHL, .decSP:
@@ -218,6 +220,27 @@ extension CPU {
         case .sp:
             self.sp &-= 1
         }
+
+        self.cycles += 2
+    }
+
+    mutating func addToHL(from: Opcode.Register16Target) {
+        let oldHL = self.hl
+
+        let fromRegister = switch from {
+        case .bc:
+            self.bc
+        case .de:
+            self.de
+        case .hl:
+            self.hl
+        case .sp:
+            self.sp
+        }
+
+        (self.hl, self.f[.carry]) = self.hl.addingReportingOverflow(fromRegister)
+        self.f[.subtraction] = false
+        self.f[.halfCarry] = (oldHL.high ^ fromRegister.high ^ self.hl.high) & 0x10 == 0x10
 
         self.cycles += 2
     }
