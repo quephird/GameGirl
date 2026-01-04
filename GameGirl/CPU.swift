@@ -225,8 +225,6 @@ extension CPU {
     }
 
     mutating func addToHL(from: Opcode.Register16Target) {
-        let oldHL = self.hl
-
         let fromRegister = switch from {
         case .bc:
             self.bc
@@ -238,9 +236,9 @@ extension CPU {
             self.sp
         }
 
+        (_, self.f[.halfCarry]) = ((self.hl & 0x0FFF) << 4).addingReportingOverflow((fromRegister & 0x0FFF) << 4)
         (self.hl, self.f[.carry]) = self.hl.addingReportingOverflow(fromRegister)
         self.f[.subtraction] = false
-        self.f[.halfCarry] = (oldHL.high ^ fromRegister.high ^ self.hl.high) & 0x10 == 0x10
 
         self.cycles += 2
     }
