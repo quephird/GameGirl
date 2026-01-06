@@ -85,12 +85,14 @@ extension CPU {
 
     // ACHTUNG!!!!! This is a temporary measure for now until
     // we have a more robust understanding of memory and the bus.
-    func readMemory(address: UInt16) -> UInt8 {
-        self.program[Int(address)]
+    mutating func readMemory(address: UInt16) -> UInt8 {
+        self.cycles += 1
+        return self.program[Int(address)]
     }
 
     mutating func writeMemory(address: UInt16, byte: UInt8) {
         self.program[Int(address)] = byte
+        self.cycles += 1
     }
 
     mutating func fetchOpcode() throws -> Opcode {
@@ -113,6 +115,8 @@ extension CPU {
             self.loadMemory(target: Opcode.IndirectMemoryTarget(opcode: opcode)!)
         case .incBC, .incDE, .incHL, .incSP:
             self.incrementRegister(target: Opcode.Register16Target(opcode: opcode)!)
+        case .incB, .incC, .incD, .incE, .incH, .incL, .incHLIndirect, .incA:
+            self.incrementRegister(target: Opcode.Register8Target(opcode: opcode)!)
         case .ldImmediateIndirectFromSP:
             self.loadMemoryFromSP()
         case .addBCToHL, .addDEToHL, .addHLToHL, .addSPToHL:
@@ -125,14 +129,14 @@ extension CPU {
     }
 
     public mutating func executeInstruction() throws {
-        let opcode = try self.fetchOpcode()
         let oldCycles = self.cycles
+        let opcode = try self.fetchOpcode()
         self.execute(opcode: opcode)
         assert(self.cycles - oldCycles == opcode.cycles, "The cycle count for this instruction is off: \(opcode)")
     }
 
     mutating func nop() {
-        self.cycles += 1
+        // Nothing to see here!!!
     }
 
     mutating func load(target: Opcode.Register16Target) {
@@ -148,8 +152,6 @@ extension CPU {
         case .sp:
             self.sp = word
         }
-
-        self.cycles += 3
     }
 
     mutating func loadMemory(target: Opcode.IndirectMemoryTarget) {
@@ -165,8 +167,6 @@ extension CPU {
             self.writeMemory(address: self.hl, byte: self.a)
             self.hl -= 1
         }
-
-        self.cycles += 2
     }
 
     mutating func loadAFromMemory(target: Opcode.IndirectMemoryTarget) {
@@ -182,16 +182,12 @@ extension CPU {
             self.a = readMemory(address: self.hl)
             self.hl -= 1
         }
-
-        self.cycles += 2
     }
 
     mutating func loadMemoryFromSP() {
         let address = self.readProgramWord()
         self.writeMemory(address: address, byte: self.sp.low)
         self.writeMemory(address: address+1, byte: self.sp.high)
-
-        self.cycles += 5
     }
 
     mutating func incrementRegister(target: Opcode.Register16Target) {
@@ -206,7 +202,29 @@ extension CPU {
             self.sp &+= 1
         }
 
-        self.cycles += 2
+        // NOTA BENE: This set of instructions incurs an extra cycle
+        self.cycles += 1
+    }
+
+    mutating func incrementRegister(target: Opcode.Register8Target) {
+        switch target {
+        case .b:
+            self.b &+= 1
+        case .c:
+            self.c &+= 1
+        case .d:
+            self.d &+= 1
+        case .e:
+            self.e &+= 1
+        case .h:
+            self.h &+= 1
+        case .l:
+            self.l &+= 1
+        case .hlIndirect:
+            self.writeMemory(address: self.hl, byte: self.readMemory(address: self.hl) &+ 1)
+        case .a:
+            self.a &+= 1
+        }
     }
 
     mutating func decrementRegister(target: Opcode.Register16Target) {
@@ -221,7 +239,8 @@ extension CPU {
             self.sp &-= 1
         }
 
-        self.cycles += 2
+        // NOTA BENE: This set of instructions incurs an extra cycle
+        self.cycles += 1
     }
 
     mutating func addToHL(from: Opcode.Register16Target) {
@@ -240,6 +259,7 @@ extension CPU {
         (self.hl, self.f[.carry]) = self.hl.addingReportingOverflow(fromRegister)
         self.f[.subtraction] = false
 
-        self.cycles += 2
+        // NOTA BENE: This set of instructions incurs an extra cycle
+        self.cycles += 1
     }
 }
