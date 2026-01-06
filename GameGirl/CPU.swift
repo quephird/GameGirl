@@ -117,6 +117,8 @@ extension CPU {
             self.incrementRegister(target: Opcode.Register16Target(opcode: opcode)!)
         case .incB, .incC, .incD, .incE, .incH, .incL, .incHLIndirect, .incA:
             self.incrementRegister(target: Opcode.Register8Target(opcode: opcode)!)
+        case .decB, .decC, .decD, .decE, .decH, .decL, .decHLIndirect, .decA:
+            self.decrementRegister(target: Opcode.Register8Target(opcode: opcode)!)
         case .ldImmediateIndirectFromSP:
             self.loadMemoryFromSP()
         case .addBCToHL, .addDEToHL, .addHLToHL, .addSPToHL:
@@ -241,6 +243,27 @@ extension CPU {
 
         // NOTA BENE: This set of instructions incurs an extra cycle
         self.cycles += 1
+    }
+
+    mutating func decrementRegister(target: Opcode.Register8Target) {
+        switch target {
+        case .b:
+            self.b &-= 1
+        case .c:
+            self.c &-= 1
+        case .d:
+            self.d &-= 1
+        case .e:
+            self.e &-= 1
+        case .h:
+            self.h &-= 1
+        case .l:
+            self.l &-= 1
+        case .hlIndirect:
+            self.writeMemory(address: self.hl, byte: self.readMemory(address: self.hl) &- 1)
+        case .a:
+            self.a &-= 1
+        }
     }
 
     mutating func addToHL(from: Opcode.Register16Target) {

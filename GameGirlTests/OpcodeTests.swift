@@ -450,6 +450,110 @@ struct OpcodeTests {
                  sp: .newValue(0x1233))
     }
 
+    @Test mutating func decB() async throws {
+        self.cpu.b = 0x43
+        self.cpu.setProgram(program: [0x05])
+        let oldCPU = self.cpu
+
+        try self.cpu.executeInstruction()
+
+        checkCPU(oldCPU,
+                 extraCycles: 1,
+                 pc: 0x0001,
+                 b: .newValue(0x42))
+    }
+
+    @Test mutating func decC() async throws {
+        self.cpu.c = 0x43
+        self.cpu.setProgram(program: [0x0D])
+        let oldCPU = self.cpu
+
+        try self.cpu.executeInstruction()
+
+        checkCPU(oldCPU,
+                 extraCycles: 1,
+                 pc: 0x0001,
+                 c: .newValue(0x42))
+    }
+
+    @Test mutating func decD() async throws {
+        self.cpu.d = 0x43
+        self.cpu.setProgram(program: [0x15])
+        let oldCPU = self.cpu
+
+        try self.cpu.executeInstruction()
+
+        checkCPU(oldCPU,
+                 extraCycles: 1,
+                 pc: 0x0001,
+                 d: .newValue(0x42))
+    }
+
+    @Test mutating func decE() async throws {
+        self.cpu.e = 0x43
+        self.cpu.setProgram(program: [0x1D])
+        let oldCPU = self.cpu
+
+        try self.cpu.executeInstruction()
+
+        checkCPU(oldCPU,
+                 extraCycles: 1,
+                 pc: 0x0001,
+                 e: .newValue(0x42))
+    }
+
+    @Test mutating func decH() async throws {
+        self.cpu.h = 0x43
+        self.cpu.setProgram(program: [0x25])
+        let oldCPU = self.cpu
+
+        try self.cpu.executeInstruction()
+
+        checkCPU(oldCPU,
+                 extraCycles: 1,
+                 pc: 0x0001,
+                 h: .newValue(0x42))
+    }
+
+    @Test mutating func decL() async throws {
+        self.cpu.l = 0x43
+        self.cpu.setProgram(program: [0x2D])
+        let oldCPU = self.cpu
+
+        try self.cpu.executeInstruction()
+
+        checkCPU(oldCPU,
+                 extraCycles: 1,
+                 pc: 0x0001,
+                 l: .newValue(0x42))
+    }
+
+    @Test mutating func decHLIndirect() async throws {
+        self.cpu.hl = 0x0001
+        self.cpu.setProgram(program: [0x35, 0x43])
+        let oldCPU = self.cpu
+
+        try self.cpu.executeInstruction()
+
+        checkCPU(oldCPU,
+                 extraCycles: 3,
+                 pc: 0x0001,
+                 memoryChanges: [0x0001: 0x42])
+    }
+
+    @Test mutating func decA() async throws {
+        self.cpu.a = 0x43
+        self.cpu.setProgram(program: [0x3D])
+        let oldCPU = self.cpu
+
+        try self.cpu.executeInstruction()
+
+        checkCPU(oldCPU,
+                 extraCycles: 1,
+                 pc: 0x0001,
+                 a: .newValue(0x42))
+    }
+
     @Test mutating func addBCToHL() async throws {
         self.cpu.bc = 0x0102
         self.cpu.hl = 0x0304
