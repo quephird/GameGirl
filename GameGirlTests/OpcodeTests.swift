@@ -459,7 +459,7 @@ struct OpcodeTests {
     }
 
     @Test mutating func decB() async throws {
-        self.cpu.b = 0x43
+        self.cpu.b = 0x0F
         self.cpu.setProgram(program: [0x05])
         let oldCPU = self.cpu
 
@@ -468,11 +468,12 @@ struct OpcodeTests {
         checkCPU(oldCPU,
                  extraCycles: 1,
                  pc: 0x0001,
-                 b: .newValue(0x42))
+                 f: .newValue(RegisterBit.subtraction.value | RegisterBit.halfCarry.value),
+                 b: .newValue(0x0E))
     }
 
     @Test mutating func decC() async throws {
-        self.cpu.c = 0x43
+        self.cpu.c = 0x10
         self.cpu.setProgram(program: [0x0D])
         let oldCPU = self.cpu
 
@@ -481,11 +482,12 @@ struct OpcodeTests {
         checkCPU(oldCPU,
                  extraCycles: 1,
                  pc: 0x0001,
-                 c: .newValue(0x42))
+                 f: .newValue(RegisterBit.subtraction.value),
+                 c: .newValue(0x0F))
     }
 
     @Test mutating func decD() async throws {
-        self.cpu.d = 0x43
+        self.cpu.d = 0x01
         self.cpu.setProgram(program: [0x15])
         let oldCPU = self.cpu
 
@@ -494,7 +496,8 @@ struct OpcodeTests {
         checkCPU(oldCPU,
                  extraCycles: 1,
                  pc: 0x0001,
-                 d: .newValue(0x42))
+                 f: .newValue(RegisterBit.subtraction.value | RegisterBit.halfCarry.value | RegisterBit.zero.value),
+                 d: .newValue(0x00))
     }
 
     @Test mutating func decE() async throws {
@@ -507,6 +510,7 @@ struct OpcodeTests {
         checkCPU(oldCPU,
                  extraCycles: 1,
                  pc: 0x0001,
+                 f: .newValue(RegisterBit.subtraction.value | RegisterBit.halfCarry.value),
                  e: .newValue(0x42))
     }
 
@@ -520,6 +524,7 @@ struct OpcodeTests {
         checkCPU(oldCPU,
                  extraCycles: 1,
                  pc: 0x0001,
+                 f: .newValue(RegisterBit.subtraction.value | RegisterBit.halfCarry.value),
                  h: .newValue(0x42))
     }
 
@@ -533,6 +538,7 @@ struct OpcodeTests {
         checkCPU(oldCPU,
                  extraCycles: 1,
                  pc: 0x0001,
+                 f: .newValue(RegisterBit.subtraction.value | RegisterBit.halfCarry.value),
                  l: .newValue(0x42))
     }
 
@@ -546,6 +552,7 @@ struct OpcodeTests {
         checkCPU(oldCPU,
                  extraCycles: 3,
                  pc: 0x0001,
+                 f: .newValue(RegisterBit.subtraction.value | RegisterBit.halfCarry.value),
                  memoryChanges: [0x0001: 0x42])
     }
 
@@ -559,7 +566,8 @@ struct OpcodeTests {
         checkCPU(oldCPU,
                  extraCycles: 1,
                  pc: 0x0001,
-                 a: .newValue(0x42))
+                 a: .newValue(0x42),
+                 f: .newValue(RegisterBit.subtraction.value | RegisterBit.halfCarry.value))
     }
 
     @Test mutating func addBCToHL() async throws {

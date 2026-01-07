@@ -259,22 +259,35 @@ extension CPU {
     mutating func decrementRegister(target: Opcode.Register8Target) {
         switch target {
         case .b:
-            self.b &-= 1
+            self.decrementRegister8Impl(register: &self.b, flags: &self.f)
         case .c:
-            self.c &-= 1
+            self.decrementRegister8Impl(register: &self.c, flags: &self.f)
         case .d:
-            self.d &-= 1
+            self.decrementRegister8Impl(register: &self.d, flags: &self.f)
         case .e:
-            self.e &-= 1
+            self.decrementRegister8Impl(register: &self.e, flags: &self.f)
         case .h:
-            self.h &-= 1
+            self.decrementRegister8Impl(register: &self.h, flags: &self.f)
         case .l:
-            self.l &-= 1
+            self.decrementRegister8Impl(register: &self.l, flags: &self.f)
         case .hlIndirect:
-            self.writeMemory(address: self.hl, byte: self.readMemory(address: self.hl) &- 1)
+            var newValue = self.readMemory(address: self.hl)
+            self.decrementRegister8Impl(register: &newValue, flags: &self.f)
+            self.writeMemory(address: self.hl, byte: newValue)
         case .a:
-            self.a &-= 1
+            self.decrementRegister8Impl(register: &self.a, flags: &self.f)
         }
+    }
+
+    func decrementRegister8Impl(register: inout Register8, flags: inout Register8) {
+        let oldRegister = register
+
+        register &-= 1
+        // NOTA BENE: Per the GameBoy technical manual, we need to set the half carry
+        // flag if there was _not_ a borrow.
+        flags[.halfCarry] = (((oldRegister & 0x0F) &- 0x01) & 0x10) != 0x10
+        flags[.zero] = register == 0
+        flags[.subtraction] = true
     }
 
     mutating func addToHL(from: Opcode.Register16Target) {
