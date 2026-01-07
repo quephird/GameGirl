@@ -292,7 +292,7 @@ struct OpcodeTests {
     }
 
     @Test mutating func incB() async throws {
-        self.cpu.b = 0x41
+        self.cpu.b = 0x0F
         self.cpu.setProgram(program: [0x04])
         let oldCPU = self.cpu
 
@@ -301,11 +301,12 @@ struct OpcodeTests {
         checkCPU(oldCPU,
                  extraCycles: 1,
                  pc: 0x0001,
-                 b: .newValue(0x42))
+                 f: .newValue(RegisterBit.halfCarry.value),
+                 b: .newValue(0x10))
     }
 
     @Test mutating func incC() async throws {
-        self.cpu.c = 0x41
+        self.cpu.c = 0xFF
         self.cpu.setProgram(program: [0x0C])
         let oldCPU = self.cpu
 
@@ -314,7 +315,8 @@ struct OpcodeTests {
         checkCPU(oldCPU,
                  extraCycles: 1,
                  pc: 0x0001,
-                 c: .newValue(0x42))
+                 f: .newValue(RegisterBit.zero.value | RegisterBit.carry.value | RegisterBit.halfCarry.value),
+                 c: .newValue(0x00))
     }
 
     @Test mutating func incD() async throws {
@@ -327,6 +329,7 @@ struct OpcodeTests {
         checkCPU(oldCPU,
                  extraCycles: 1,
                  pc: 0x0001,
+                 f: .unchanged,
                  d: .newValue(0x42))
     }
 
@@ -340,6 +343,7 @@ struct OpcodeTests {
         checkCPU(oldCPU,
                  extraCycles: 1,
                  pc: 0x0001,
+                 f: .unchanged,
                  e: .newValue(0x42))
     }
 
@@ -353,6 +357,7 @@ struct OpcodeTests {
         checkCPU(oldCPU,
                  extraCycles: 1,
                  pc: 0x0001,
+                 f: .unchanged,
                  h: .newValue(0x42))
     }
 
@@ -366,12 +371,13 @@ struct OpcodeTests {
         checkCPU(oldCPU,
                  extraCycles: 1,
                  pc: 0x0001,
+                 f: .unchanged,
                  l: .newValue(0x42))
     }
 
     @Test mutating func incHLIndirect() async throws {
         self.cpu.hl = 0x0001
-        self.cpu.setProgram(program: [0x34, 0x41])
+        self.cpu.setProgram(program: [0x34, 0xFF])
         let oldCPU = self.cpu
 
         try self.cpu.executeInstruction()
@@ -379,7 +385,8 @@ struct OpcodeTests {
         checkCPU(oldCPU,
                  extraCycles: 3,
                  pc: 0x0001,
-                 memoryChanges: [0x0001: 0x42])
+                 f: .newValue(RegisterBit.zero.value | RegisterBit.carry.value | RegisterBit.halfCarry.value),
+                 memoryChanges: [0x0001: 0x00])
     }
 
     @Test mutating func incA() async throws {
@@ -392,7 +399,8 @@ struct OpcodeTests {
         checkCPU(oldCPU,
                  extraCycles: 1,
                  pc: 0x0001,
-                 a: .newValue(0x42))
+                 a: .newValue(0x42),
+                 f: .unchanged)
     }
 
     @Test mutating func decBC() async throws {
@@ -612,7 +620,7 @@ struct OpcodeTests {
         checkCPU(oldCPU,
                  extraCycles: 2,
                  pc: 0x0001,
-                 f: .newValue(RegisterBit.halfCarry.value ^ RegisterBit.carry.value),
+                 f: .newValue(RegisterBit.halfCarry.value | RegisterBit.carry.value),
                  h: .newValue(0x00),
                  l: .newValue(0x00))
     }

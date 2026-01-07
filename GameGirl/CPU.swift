@@ -211,22 +211,33 @@ extension CPU {
     mutating func incrementRegister(target: Opcode.Register8Target) {
         switch target {
         case .b:
-            self.b &+= 1
+            self.incrementRegister8Impl(register: &self.b, flags: &self.f)
         case .c:
-            self.c &+= 1
+            self.incrementRegister8Impl(register: &self.c, flags: &self.f)
         case .d:
-            self.d &+= 1
+            self.incrementRegister8Impl(register: &self.d, flags: &self.f)
         case .e:
-            self.e &+= 1
+            self.incrementRegister8Impl(register: &self.e, flags: &self.f)
         case .h:
-            self.h &+= 1
+            self.incrementRegister8Impl(register: &self.h, flags: &self.f)
         case .l:
-            self.l &+= 1
+            self.incrementRegister8Impl(register: &self.l, flags: &self.f)
         case .hlIndirect:
-            self.writeMemory(address: self.hl, byte: self.readMemory(address: self.hl) &+ 1)
+            var newValue = self.readMemory(address: self.hl)
+            self.incrementRegister8Impl(register: &newValue, flags: &self.f)
+            self.writeMemory(address: self.hl, byte: newValue)
         case .a:
-            self.a &+= 1
+            self.incrementRegister8Impl(register: &self.a, flags: &self.f)
         }
+    }
+
+    func incrementRegister8Impl(register: inout Register8, flags: inout Register8) {
+        let oldRegister = register
+
+        (register, flags[.carry]) = register.addingReportingOverflow(1)
+        (_, flags[.halfCarry]) = (oldRegister << 4).addingReportingOverflow(1 << 4)
+        flags[.zero] = register == 0
+        flags[.subtraction] = false
     }
 
     mutating func decrementRegister(target: Opcode.Register16Target) {
