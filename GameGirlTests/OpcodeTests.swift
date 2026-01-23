@@ -334,6 +334,276 @@ struct OpcodeTests {
                  ])
     }
 
+    @Test mutating func rlcaWithCarryAndZero() async throws {
+        self.cpu.a = 0x80
+        self.cpu.f = 0x00
+        self.cpu.setProgram(program: [0x07])
+        let oldCPU = self.cpu
+
+        try self.cpu.executeInstruction()
+
+        checkCPU(oldCPU,
+                 extraCycles: 1,
+                 pc: 0x0001,
+                 a: .newValue(0x00),
+                 f: .newValue(RegisterBit.zero.value | RegisterBit.carry.value))
+    }
+
+    @Test mutating func rlcaWithCarryButNotZero() async throws {
+        self.cpu.a = 0xFF
+        self.cpu.f = 0x00
+        self.cpu.setProgram(program: [0x07])
+        let oldCPU = self.cpu
+
+        try self.cpu.executeInstruction()
+
+        checkCPU(oldCPU,
+                 extraCycles: 1,
+                 pc: 0x0001,
+                 a: .newValue(0xFE),
+                 f: .newValue(RegisterBit.carry.value))
+    }
+
+    @Test mutating func rlcaWithZeroButNotCarry() async throws {
+        self.cpu.a = 0x00
+        self.cpu.f = 0x00
+        self.cpu.setProgram(program: [0x07])
+        let oldCPU = self.cpu
+
+        try self.cpu.executeInstruction()
+
+        checkCPU(oldCPU,
+                 extraCycles: 1,
+                 pc: 0x0001,
+                 a: .newValue(0x00),
+                 f: .newValue(RegisterBit.zero.value))
+    }
+
+    @Test mutating func rlcaWithNoFlagsSet() async throws {
+        self.cpu.a = 0x01
+        self.cpu.f = 0x00
+        self.cpu.setProgram(program: [0x07])
+        let oldCPU = self.cpu
+
+        try self.cpu.executeInstruction()
+
+        checkCPU(oldCPU,
+                 extraCycles: 1,
+                 pc: 0x0001,
+                 a: .newValue(0x02),
+                 f: .unchanged)
+    }
+
+    @Test mutating func rrcaWithCarryAndZero() async throws {
+        self.cpu.a = 0x01
+        self.cpu.f = 0x00
+        self.cpu.setProgram(program: [0x0F])
+        let oldCPU = self.cpu
+
+        try self.cpu.executeInstruction()
+
+        checkCPU(oldCPU,
+                 extraCycles: 1,
+                 pc: 0x0001,
+                 a: .newValue(0x00),
+                 f: .newValue(RegisterBit.zero.value | RegisterBit.carry.value))
+    }
+
+    @Test mutating func rrcaWithCarryButNotZero() async throws {
+        self.cpu.a = 0xFF
+        self.cpu.f = 0x00
+        self.cpu.setProgram(program: [0x0F])
+        let oldCPU = self.cpu
+
+        try self.cpu.executeInstruction()
+
+        checkCPU(oldCPU,
+                 extraCycles: 1,
+                 pc: 0x0001,
+                 a: .newValue(0x7F),
+                 f: .newValue(RegisterBit.carry.value))
+    }
+
+    @Test mutating func rrcaWithZeroButNotCarry() async throws {
+        self.cpu.a = 0x00
+        self.cpu.f = 0x00
+        self.cpu.setProgram(program: [0x0F])
+        let oldCPU = self.cpu
+
+        try self.cpu.executeInstruction()
+
+        checkCPU(oldCPU,
+                 extraCycles: 1,
+                 pc: 0x0001,
+                 a: .newValue(0x00),
+                 f: .newValue(RegisterBit.zero.value))
+    }
+
+    @Test mutating func rrcaWithNoFlagsSet() async throws {
+        self.cpu.a = 0x80
+        self.cpu.f = 0x00
+        self.cpu.setProgram(program: [0x0F])
+        let oldCPU = self.cpu
+
+        try self.cpu.executeInstruction()
+
+        checkCPU(oldCPU,
+                 extraCycles: 1,
+                 pc: 0x0001,
+                 a: .newValue(0x40),
+                 f: .unchanged)
+    }
+
+    @Test mutating func rlaWithCarryAndZero() async throws {
+        self.cpu.a = 0x80
+        self.cpu.f = 0x00
+        self.cpu.setProgram(program: [0x17])
+        let oldCPU = self.cpu
+
+        try self.cpu.executeInstruction()
+
+        checkCPU(oldCPU,
+                 extraCycles: 1,
+                 pc: 0x0001,
+                 a: .newValue(0x00),
+                 f: .newValue(RegisterBit.zero.value | RegisterBit.carry.value))
+    }
+
+    @Test mutating func rlaWithCarryButNotZero() async throws {
+        self.cpu.a = 0xFF
+        self.cpu.f = 0x00
+        self.cpu.setProgram(program: [0x17])
+        let oldCPU = self.cpu
+
+        try self.cpu.executeInstruction()
+
+        checkCPU(oldCPU,
+                 extraCycles: 1,
+                 pc: 0x0001,
+                 a: .newValue(0xFE),
+                 f: .newValue(RegisterBit.carry.value))
+    }
+
+    @Test mutating func rlaWithZeroButNotCarry() async throws {
+        self.cpu.a = 0x00
+        self.cpu.f = 0x00
+        self.cpu.setProgram(program: [0x17])
+        let oldCPU = self.cpu
+
+        try self.cpu.executeInstruction()
+
+        checkCPU(oldCPU,
+                 extraCycles: 1,
+                 pc: 0x0001,
+                 a: .newValue(0x00),
+                 f: .newValue(RegisterBit.zero.value))
+    }
+
+    @Test mutating func rlaWithNoFlagsSet() async throws {
+        self.cpu.a = 0x01
+        self.cpu.f = 0x00
+        self.cpu.setProgram(program: [0x17])
+        let oldCPU = self.cpu
+
+        try self.cpu.executeInstruction()
+
+        checkCPU(oldCPU,
+                 extraCycles: 1,
+                 pc: 0x0001,
+                 a: .newValue(0x02),
+                 f: .unchanged)
+    }
+
+    @Test mutating func rlaWithOldCarryRotatedIn() async throws {
+        self.cpu.a = 0x00
+        self.cpu.f[.carry] = true
+        self.cpu.setProgram(program: [0x17])
+        let oldCPU = self.cpu
+
+        try self.cpu.executeInstruction()
+
+        checkCPU(oldCPU,
+                 extraCycles: 1,
+                 pc: 0x0001,
+                 a: .newValue(0x01),
+                 f: .newValue(0x00))
+    }
+
+    @Test mutating func rraWithCarryAndZero() async throws {
+        self.cpu.a = 0x01
+        self.cpu.f = 0x00
+        self.cpu.setProgram(program: [0x1F])
+        let oldCPU = self.cpu
+
+        try self.cpu.executeInstruction()
+
+        checkCPU(oldCPU,
+                 extraCycles: 1,
+                 pc: 0x0001,
+                 a: .newValue(0x00),
+                 f: .newValue(RegisterBit.zero.value | RegisterBit.carry.value))
+    }
+
+    @Test mutating func rraWithCarryButNotZero() async throws {
+        self.cpu.a = 0xFF
+        self.cpu.f = 0x00
+        self.cpu.setProgram(program: [0x1F])
+        let oldCPU = self.cpu
+
+        try self.cpu.executeInstruction()
+
+        checkCPU(oldCPU,
+                 extraCycles: 1,
+                 pc: 0x0001,
+                 a: .newValue(0x7F),
+                 f: .newValue(RegisterBit.carry.value))
+    }
+
+    @Test mutating func rraWithZeroButNotCarry() async throws {
+        self.cpu.a = 0x00
+        self.cpu.f = 0x00
+        self.cpu.setProgram(program: [0x1F])
+        let oldCPU = self.cpu
+
+        try self.cpu.executeInstruction()
+
+        checkCPU(oldCPU,
+                 extraCycles: 1,
+                 pc: 0x0001,
+                 a: .newValue(0x00),
+                 f: .newValue(RegisterBit.zero.value))
+    }
+
+    @Test mutating func rraWithNoFlagsSet() async throws {
+        self.cpu.a = 0x80
+        self.cpu.f = 0x00
+        self.cpu.setProgram(program: [0x1F])
+        let oldCPU = self.cpu
+
+        try self.cpu.executeInstruction()
+
+        checkCPU(oldCPU,
+                 extraCycles: 1,
+                 pc: 0x0001,
+                 a: .newValue(0x40),
+                 f: .unchanged)
+    }
+
+    @Test mutating func rraWithOldCarryRotatedIn() async throws {
+        self.cpu.a = 0x00
+        self.cpu.f[.carry] = true
+        self.cpu.setProgram(program: [0x1F])
+        let oldCPU = self.cpu
+
+        try self.cpu.executeInstruction()
+
+        checkCPU(oldCPU,
+                 extraCycles: 1,
+                 pc: 0x0001,
+                 a: .newValue(0x80),
+                 f: .newValue(0x00))
+    }
+
     @Test mutating func incBC() async throws {
         self.cpu.bc = 0x1234
         self.cpu.setProgram(program: [0x03])

@@ -121,6 +121,14 @@ extension CPU {
             self.decrementRegister(target: Opcode.Register8Target(opcode: opcode)!)
         case .ldBFromImmediate, .ldCFromImmediate, .ldDFromImmediate, .ldEFromImmediate, .ldHFromImmediate, .ldLFromImmediate, .ldHLIndirectFromImmediate, .ldAFromImmediate:
             self.load(target: Opcode.Register8Target(opcode: opcode)!)
+        case .rlca:
+            self.rlca()
+        case .rrca:
+            self.rrca()
+        case .rla:
+            self.rla()
+        case .rra:
+            self.rra()
         case .ldImmediateIndirectFromSP:
             self.loadMemoryFromSP()
         case .addBCToHL, .addDEToHL, .addHLToHL, .addSPToHL:
@@ -231,6 +239,40 @@ extension CPU {
 
         // NOTA BENE: This set of instructions incurs an extra cycle
         self.cycles += 1
+    }
+
+    mutating func rlca() {
+        self.f[.carry] = (self.a & 0x80) == 0x80
+        self.a <<= 1
+        self.f[.halfCarry] = false
+        self.f[.subtraction] = false
+        self.f[.zero] = self.a == 0
+    }
+
+    mutating func rrca() {
+        self.f[.carry] = (self.a & 0x01) == 0x01
+        self.a >>= 1
+        self.f[.halfCarry] = false
+        self.f[.subtraction] = false
+        self.f[.zero] = self.a == 0
+    }
+
+    mutating func rla() {
+        let oldCarry = self.f[.carry]
+        self.f[.carry] = (self.a & 0x80) == 0x80
+        self.a = (self.a << 1) | oldCarry.intValue
+        self.f[.halfCarry] = false
+        self.f[.subtraction] = false
+        self.f[.zero] = self.a == 0
+    }
+
+    mutating func rra() {
+        let oldCarry = self.f[.carry]
+        self.f[.carry] = (self.a & 0x01) == 0x01
+        self.a = (self.a >> 1) | (oldCarry.intValue << 7)
+        self.f[.halfCarry] = false
+        self.f[.subtraction] = false
+        self.f[.zero] = self.a == 0
     }
 
     mutating func incrementRegister(target: Opcode.Register8Target) {

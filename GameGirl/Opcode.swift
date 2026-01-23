@@ -13,6 +13,7 @@ enum Opcode: UInt8 {
     case incB = 0x04
     case decB = 0x05
     case ldBFromImmediate = 0x06
+    case rlca = 0x07
     case ldImmediateIndirectFromSP = 0x08
     case addBCToHL = 0x09
     case ldAFromBCIndirect = 0x0A
@@ -20,18 +21,21 @@ enum Opcode: UInt8 {
     case incC = 0x0C
     case decC = 0x0D
     case ldCFromImmediate = 0x0E
+    case rrca = 0x0F
     case ldDEFromImmediate = 0x11
     case ldDEIndirectFromA = 0x12
     case incDE = 0x13
     case incD = 0x14
     case decD = 0x15
     case ldDFromImmediate = 0x16
+    case rla = 0x17
     case addDEToHL = 0x19
     case ldAFromDEIndirect = 0x1A
     case decDE = 0x1B
     case incE = 0x1C
     case decE = 0x1D
     case ldEFromImmediate = 0x1E
+    case rra = 0x1F
     case ldHLFromImmediate = 0x21
     case ldHLIndirectFromAAndIncrement = 0x22
     case incHL = 0x23
@@ -111,6 +115,7 @@ extension Opcode {
         case .incB, .incC, .incD, .incE, .incH, .incL, .incHLIndirect, .incA: 1
         case .decB, .decC, .decD, .decE, .decH, .decL, .decHLIndirect, .decA: 1
         case .ldBFromImmediate, .ldCFromImmediate, .ldDFromImmediate, .ldEFromImmediate, .ldHFromImmediate, .ldLFromImmediate, .ldHLIndirectFromImmediate, .ldAFromImmediate: 2
+        case .rlca, .rrca, .rla, .rra: 1
         case .ldImmediateIndirectFromSP: 3
         case .addBCToHL, .addDEToHL, .addHLToHL, .addSPToHL: 1
         case .ldAFromBCIndirect, .ldAFromDEIndirect, .ldAFromHLIndirectAndIncrement, .ldAFromHLIndirectAndDecrement: 1
@@ -129,6 +134,7 @@ extension Opcode {
         case .incB, .incC, .incD, .incE, .incH, .incL, .incA: 1
         case .decB, .decC, .decD, .decE, .decH, .decL, .decA: 1
         case .ldBFromImmediate, .ldCFromImmediate, .ldDFromImmediate, .ldEFromImmediate, .ldHFromImmediate, .ldLFromImmediate, .ldAFromImmediate: 2
+        case .rlca, .rrca, .rla, .rra: 1
         case .ldHLIndirectFromImmediate: 3
         case .incHLIndirect: 3
         case .decHLIndirect: 3
