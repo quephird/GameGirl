@@ -103,6 +103,104 @@ struct OpcodeTests {
                  sp: .newValue(0x1234))
     }
 
+    @Test mutating func ldBFromImmediate() async throws {
+        self.cpu.setProgram(program: [0x06, 0x42])
+        let oldCPU = self.cpu
+
+        try self.cpu.executeInstruction()
+
+        checkCPU(oldCPU,
+                 extraCycles: 2,
+                 pc: 0x0002,
+                 b: .newValue(0x42))
+    }
+
+    @Test mutating func ldCFromImmediate() async throws {
+        self.cpu.setProgram(program: [0x0E, 0x42])
+        let oldCPU = self.cpu
+
+        try self.cpu.executeInstruction()
+
+        checkCPU(oldCPU,
+                 extraCycles: 2,
+                 pc: 0x0002,
+                 c: .newValue(0x42))
+    }
+
+    @Test mutating func ldDFromImmediate() async throws {
+        self.cpu.setProgram(program: [0x16, 0x42])
+        let oldCPU = self.cpu
+
+        try self.cpu.executeInstruction()
+
+        checkCPU(oldCPU,
+                 extraCycles: 2,
+                 pc: 0x0002,
+                 d: .newValue(0x42))
+    }
+
+    @Test mutating func ldEFromImmediate() async throws {
+        self.cpu.setProgram(program: [0x1E, 0x42])
+        let oldCPU = self.cpu
+
+        try self.cpu.executeInstruction()
+
+        checkCPU(oldCPU,
+                 extraCycles: 2,
+                 pc: 0x0002,
+                 e: .newValue(0x42))
+    }
+
+    @Test mutating func ldHFromImmediate() async throws {
+        self.cpu.setProgram(program: [0x26, 0x42])
+        let oldCPU = self.cpu
+
+        try self.cpu.executeInstruction()
+
+        checkCPU(oldCPU,
+                 extraCycles: 2,
+                 pc: 0x0002,
+                 h: .newValue(0x42))
+    }
+
+    @Test mutating func ldLFromImmediate() async throws {
+        self.cpu.setProgram(program: [0x2E, 0x42])
+        let oldCPU = self.cpu
+
+        try self.cpu.executeInstruction()
+
+        checkCPU(oldCPU,
+                 extraCycles: 2,
+                 pc: 0x0002,
+                 l: .newValue(0x42))
+    }
+
+    @Test mutating func ldHLIndirectFromImmediate() async throws {
+        self.cpu.setProgram(program: [0x36, 0x42, 0x00])
+        self.cpu.hl = 0x0002
+        let oldCPU = self.cpu
+
+        try self.cpu.executeInstruction()
+
+        checkCPU(oldCPU,
+                 extraCycles: 3,
+                 pc: 0x0002,
+                 memoryChanges: [0x0002 : 0x42])
+    }
+
+    @Test mutating func ldAFromImmediate() async throws {
+        self.cpu.setProgram(program: [0x3E, 0x42])
+        let oldCPU = self.cpu
+
+        try self.cpu.executeInstruction()
+
+        checkCPU(oldCPU,
+                 extraCycles: 2,
+                 pc: 0x0002,
+                 a: .newValue(0x42))
+    }
+
+
     @Test mutating func ldBCIndirectFromA() async throws {
         self.cpu.bc = 0x0003
         self.cpu.a = 0x42

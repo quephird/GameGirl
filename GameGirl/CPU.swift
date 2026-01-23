@@ -119,6 +119,8 @@ extension CPU {
             self.incrementRegister(target: Opcode.Register8Target(opcode: opcode)!)
         case .decB, .decC, .decD, .decE, .decH, .decL, .decHLIndirect, .decA:
             self.decrementRegister(target: Opcode.Register8Target(opcode: opcode)!)
+        case .ldBFromImmediate, .ldCFromImmediate, .ldDFromImmediate, .ldEFromImmediate, .ldHFromImmediate, .ldLFromImmediate, .ldHLIndirectFromImmediate, .ldAFromImmediate:
+            self.load(target: Opcode.Register8Target(opcode: opcode)!)
         case .ldImmediateIndirectFromSP:
             self.loadMemoryFromSP()
         case .addBCToHL, .addDEToHL, .addHLToHL, .addSPToHL:
@@ -153,6 +155,29 @@ extension CPU {
             self.hl = word
         case .sp:
             self.sp = word
+        }
+    }
+
+    mutating func load(target: Opcode.Register8Target) {
+        let byte = self.readProgramByte()
+
+        switch target {
+        case .b:
+            self.b = byte
+        case .c:
+            self.c = byte
+        case .d:
+            self.d = byte
+        case .e:
+            self.e = byte
+        case .h:
+            self.h = byte
+        case .l:
+            self.l = byte
+        case .hlIndirect:
+            self.writeMemory(address: self.hl, byte: byte)
+        case .a:
+            self.a = byte
         }
     }
 

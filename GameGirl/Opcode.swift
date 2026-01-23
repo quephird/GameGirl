@@ -12,42 +12,50 @@ enum Opcode: UInt8 {
     case incBC = 0x03
     case incB = 0x04
     case decB = 0x05
+    case ldBFromImmediate = 0x06
     case ldImmediateIndirectFromSP = 0x08
     case addBCToHL = 0x09
     case ldAFromBCIndirect = 0x0A
     case decBC = 0x0B
     case incC = 0x0C
     case decC = 0x0D
+    case ldCFromImmediate = 0x0E
     case ldDEFromImmediate = 0x11
     case ldDEIndirectFromA = 0x12
     case incDE = 0x13
     case incD = 0x14
     case decD = 0x15
+    case ldDFromImmediate = 0x16
     case addDEToHL = 0x19
     case ldAFromDEIndirect = 0x1A
     case decDE = 0x1B
     case incE = 0x1C
     case decE = 0x1D
+    case ldEFromImmediate = 0x1E
     case ldHLFromImmediate = 0x21
     case ldHLIndirectFromAAndIncrement = 0x22
     case incHL = 0x23
     case incH = 0x24
     case decH = 0x25
+    case ldHFromImmediate = 0x26
     case addHLToHL = 0x29
     case ldAFromHLIndirectAndIncrement = 0x2A
     case decHL = 0x2B
     case incL = 0x2C
     case decL = 0x2D
+    case ldLFromImmediate = 0x2E
     case ldSPFromImmediate = 0x31
     case ldHLIndirectFromAAndDecrement = 0x32
     case incSP = 0x33
     case incHLIndirect = 0x34
     case decHLIndirect = 0x35
+    case ldHLIndirectFromImmediate = 0x36
     case addSPToHL = 0x39
     case ldAFromHLIndirectAndDecrement = 0x3A
     case decSP = 0x3B
     case incA = 0x3C
     case decA = 0x3D
+    case ldAFromImmediate = 0x3E
 }
 
 extension Opcode {
@@ -102,6 +110,7 @@ extension Opcode {
         case .incBC, .incDE, .incHL, .incSP: 1
         case .incB, .incC, .incD, .incE, .incH, .incL, .incHLIndirect, .incA: 1
         case .decB, .decC, .decD, .decE, .decH, .decL, .decHLIndirect, .decA: 1
+        case .ldBFromImmediate, .ldCFromImmediate, .ldDFromImmediate, .ldEFromImmediate, .ldHFromImmediate, .ldLFromImmediate, .ldHLIndirectFromImmediate, .ldAFromImmediate: 2
         case .ldImmediateIndirectFromSP: 3
         case .addBCToHL, .addDEToHL, .addHLToHL, .addSPToHL: 1
         case .ldAFromBCIndirect, .ldAFromDEIndirect, .ldAFromHLIndirectAndIncrement, .ldAFromHLIndirectAndDecrement: 1
@@ -119,6 +128,8 @@ extension Opcode {
         case .incBC, .incDE, .incHL, .incSP: 2
         case .incB, .incC, .incD, .incE, .incH, .incL, .incA: 1
         case .decB, .decC, .decD, .decE, .decH, .decL, .decA: 1
+        case .ldBFromImmediate, .ldCFromImmediate, .ldDFromImmediate, .ldEFromImmediate, .ldHFromImmediate, .ldLFromImmediate, .ldAFromImmediate: 2
+        case .ldHLIndirectFromImmediate: 3
         case .incHLIndirect: 3
         case .decHLIndirect: 3
         case .ldImmediateIndirectFromSP: 5
