@@ -604,6 +604,187 @@ struct OpcodeTests {
                  f: .newValue(0x00))
     }
 
+    @Test mutating func daaAfterAdditionNoCorrectionNeeded() async throws {
+        self.cpu.a = 0x01
+        self.cpu.f[.carry] = false
+        self.cpu.f[.subtraction] = false
+        self.cpu.setProgram(program: [0x27])
+        let oldCPU = self.cpu
+
+        try self.cpu.executeInstruction()
+
+        checkCPU(oldCPU,
+                 extraCycles: 1,
+                 pc: 0x0001,
+                 a: .unchanged,
+                 f: .unchanged)
+    }
+
+    @Test mutating func daaAfterAdditionZeroResult() async throws {
+        self.cpu.a = 0x00
+        self.cpu.f[.carry] = false
+        self.cpu.f[.subtraction] = false
+        self.cpu.setProgram(program: [0x27])
+        let oldCPU = self.cpu
+
+        try self.cpu.executeInstruction()
+
+        checkCPU(oldCPU,
+                 extraCycles: 1,
+                 pc: 0x0001,
+                 a: .unchanged,
+                 f: .newValue(RegisterBit.zero.value))
+    }
+
+    @Test mutating func daaAfterAdditionOnesDigitCorrected() async throws {
+        self.cpu.a = 0x0F
+        self.cpu.f[.carry] = false
+        self.cpu.f[.subtraction] = false
+        self.cpu.setProgram(program: [0x27])
+        let oldCPU = self.cpu
+
+        try self.cpu.executeInstruction()
+
+        checkCPU(oldCPU,
+                 extraCycles: 1,
+                 pc: 0x0001,
+                 a: .newValue(0x15),
+                 f: .unchanged)
+    }
+
+    @Test mutating func daaAfterAdditionTensDigitCorrected() async throws {
+        self.cpu.a = 0xF0
+        self.cpu.f[.carry] = false
+        self.cpu.f[.subtraction] = false
+        self.cpu.setProgram(program: [0x27])
+        let oldCPU = self.cpu
+
+        try self.cpu.executeInstruction()
+
+        checkCPU(oldCPU,
+                 extraCycles: 1,
+                 pc: 0x0001,
+                 a: .newValue(0x50),
+                 f: .newValue(RegisterBit.carry.value))
+    }
+
+    @Test mutating func daaAfterAdditionBothDigitsCorrected() async throws {
+        self.cpu.a = 0x9C
+        self.cpu.f[.carry] = false
+        self.cpu.f[.subtraction] = false
+        self.cpu.setProgram(program: [0x27])
+        let oldCPU = self.cpu
+
+        try self.cpu.executeInstruction()
+
+        checkCPU(oldCPU,
+                 extraCycles: 1,
+                 pc: 0x0001,
+                 a: .newValue(0x02),
+                 f: .newValue(RegisterBit.carry.value))
+    }
+
+    @Test mutating func daaAfterSubtractionNoCorrectionNeeded() async throws {
+        self.cpu.a = 0x09
+        self.cpu.f[.carry] = false
+        self.cpu.f[.subtraction] = true
+        self.cpu.setProgram(program: [0x27])
+        let oldCPU = self.cpu
+
+        try self.cpu.executeInstruction()
+
+        checkCPU(oldCPU,
+                 extraCycles: 1,
+                 pc: 0x0001,
+                 a: .unchanged,
+                 f: .unchanged)
+    }
+
+    @Test mutating func daaAfterSubtractionOnesDigitCorrected() async throws {
+        self.cpu.a = 0x0D
+        self.cpu.f[.carry] = false
+        self.cpu.f[.halfCarry] = true
+        self.cpu.f[.subtraction] = true
+        self.cpu.setProgram(program: [0x27])
+        let oldCPU = self.cpu
+
+        try self.cpu.executeInstruction()
+
+        checkCPU(oldCPU,
+                 extraCycles: 1,
+                 pc: 0x0001,
+                 a: .newValue(0x07),
+                 f: .newValue(RegisterBit.subtraction.value))
+    }
+
+    @Test mutating func daaAfterSubtractionTensDigitCorrected() async throws {
+        self.cpu.a = 0xE4
+        self.cpu.f[.carry] = true
+        self.cpu.f[.halfCarry] = false
+        self.cpu.f[.subtraction] = true
+        self.cpu.setProgram(program: [0x27])
+        let oldCPU = self.cpu
+
+        try self.cpu.executeInstruction()
+
+        checkCPU(oldCPU,
+                 extraCycles: 1,
+                 pc: 0x0001,
+                 a: .newValue(0x84),
+                 f: .newValue(RegisterBit.subtraction.value | RegisterBit.carry.value))
+    }
+
+    @Test mutating func cpl() async throws {
+        self.cpu.a = 0x00
+        self.cpu.setProgram(program: [0x2F])
+        let oldCPU = self.cpu
+
+        try self.cpu.executeInstruction()
+
+        checkCPU(oldCPU,
+                 extraCycles: 1,
+                 pc: 0x0001,
+                 a: .newValue(0xFF),
+                 f: .newValue(RegisterBit.halfCarry.value | RegisterBit.subtraction.value))
+    }
+
+    @Test mutating func scf() async throws {
+        self.cpu.setProgram(program: [0x37])
+        let oldCPU = self.cpu
+
+        try self.cpu.executeInstruction()
+
+        checkCPU(oldCPU,
+                 extraCycles: 1,
+                 pc: 0x0001,
+                 f: .newValue(RegisterBit.carry.value))
+    }
+
+    @Test mutating func ccfSetCarry() async throws {
+        self.cpu.setProgram(program: [0x3F])
+        let oldCPU = self.cpu
+
+        try self.cpu.executeInstruction()
+
+        checkCPU(oldCPU,
+                 extraCycles: 1,
+                 pc: 0x0001,
+                 f: .newValue(RegisterBit.carry.value))
+    }
+
+    @Test mutating func ccfResetCarry() async throws {
+        self.cpu.f[.carry] = true
+        self.cpu.setProgram(program: [0x3F])
+        let oldCPU = self.cpu
+
+        try self.cpu.executeInstruction()
+
+        checkCPU(oldCPU,
+                 extraCycles: 1,
+                 pc: 0x0001,
+                 f: .newValue(0x00))
+    }
+
     @Test mutating func incBC() async throws {
         self.cpu.bc = 0x1234
         self.cpu.setProgram(program: [0x03])

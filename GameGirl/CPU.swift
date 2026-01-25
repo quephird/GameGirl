@@ -129,6 +129,14 @@ extension CPU {
             self.rla()
         case .rra:
             self.rra()
+        case .daa:
+            self.daa()
+        case .cpl:
+            self.cpl()
+        case .scf:
+            self.scf()
+        case .ccf:
+            self.ccf()
         case .ldImmediateIndirectFromSP:
             self.loadMemoryFromSP()
         case .addBCToHL, .addDEToHL, .addHLToHL, .addSPToHL:
@@ -273,6 +281,47 @@ extension CPU {
         self.f[.halfCarry] = false
         self.f[.subtraction] = false
         self.f[.zero] = self.a == 0
+    }
+
+    mutating func daa() {
+        // NOTA BENE: Implementation adapted from this excellent blog post:
+        //
+        //    https://blog.ollien.com/posts/gb-daa/
+        var offset: UInt8 = 0x00
+        var newCarry = false
+
+        if (!self.f[.subtraction] && (self.a & 0x0F) > 0x09) || self.f[.halfCarry] {
+            offset += 0x06
+        }
+
+        if (!self.f[.subtraction] && self.a > 0x99) || self.f[.carry] {
+            offset += 0x60
+            newCarry = true
+        }
+
+        if self.f[.subtraction] {
+            self.a &-= offset
+        } else {
+            self.a &+= offset
+        }
+
+        self.f[.halfCarry] = false
+        self.f[.carry] = newCarry
+        self.f[.zero] = self.a == 0
+    }
+
+    mutating func cpl() {
+        self.a = ~self.a
+        self.f[.halfCarry] = true
+        self.f[.subtraction] = true
+    }
+
+    mutating func scf() {
+        self.f[.carry] = true
+    }
+
+    mutating func ccf() {
+        self.f[.carry] = !self.f[.carry]
     }
 
     mutating func incrementRegister(target: Opcode.Register8Target) {
