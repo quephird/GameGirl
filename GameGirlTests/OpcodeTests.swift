@@ -42,1144 +42,812 @@ struct OpcodeTests {
     var cpu = CPU()
 
     @Test mutating func nop() async throws {
-        self.cpu.setProgram(program: [0x00])
-        let oldCPU = self.cpu
-
-        try self.cpu.executeInstruction()
-
-        checkCPU(oldCPU,
-                 extraCycles: 1,
-                 pc: 0x0001)
+        try await self.testProgram(program: [0x00],
+                                   extraCycles: 1,
+                                   newPC: 0x0001)
     }
 
     @Test mutating func ldBCFromImmediate() async throws {
-        self.cpu.setProgram(program: [0x01, 0x34, 0x12])
-        let oldCPU = self.cpu
-
-        try self.cpu.executeInstruction()
-
-        checkCPU(oldCPU,
-                 extraCycles: 3,
-                 pc: 0x0003,
-                 b: .newValue(0x12),
-                 c: .newValue(0x34))
+        try await self.testProgram(program: [0x01, 0x34, 0x12],
+                                   extraCycles: 3,
+                                   newPC: 0x0003,
+                                   newB: .newValue(0x12),
+                                   newC: .newValue(0x34))
     }
 
     @Test mutating func ldDEFromImmediate() async throws {
-        self.cpu.setProgram(program: [0x11, 0x34, 0x12])
-        let oldCPU = self.cpu
-
-        try self.cpu.executeInstruction()
-
-        checkCPU(oldCPU,
-                 extraCycles: 3,
-                 pc: 0x0003,
-                 d: .newValue(0x12),
-                 e: .newValue(0x34))
+        try await self.testProgram(program: [0x11, 0x34, 0x12],
+                                   extraCycles: 3,
+                                   newPC: 0x0003,
+                                   newD: .newValue(0x12),
+                                   newE: .newValue(0x34))
     }
 
     @Test mutating func ldHLFromImmediate() async throws {
-        self.cpu.setProgram(program: [0x21, 0x34, 0x12])
-        let oldCPU = self.cpu
-
-        try self.cpu.executeInstruction()
-
-        checkCPU(oldCPU,
-                 extraCycles: 3,
-                 pc: 0x0003,
-                 h: .newValue(0x12),
-                 l: .newValue(0x34))
+        try await self.testProgram(program: [0x21, 0x34, 0x12],
+                                   extraCycles: 3,
+                                   newPC: 0x0003,
+                                   newH: .newValue(0x12),
+                                   newL: .newValue(0x34))
     }
 
     @Test mutating func ldSPFromImmediate() async throws {
-        self.cpu.setProgram(program: [0x31, 0x34, 0x12])
-        let oldCPU = self.cpu
-
-        try self.cpu.executeInstruction()
-
-        checkCPU(oldCPU,
-                 extraCycles: 3,
-                 pc: 0x0003,
-                 sp: .newValue(0x1234))
+        try await self.testProgram(program: [0x31, 0x34, 0x12],
+                                   extraCycles: 3,
+                                   newPC: 0x0003,
+                                   newSP: .newValue(0x1234))
     }
 
     @Test mutating func ldBFromImmediate() async throws {
-        self.cpu.setProgram(program: [0x06, 0x42])
-        let oldCPU = self.cpu
-
-        try self.cpu.executeInstruction()
-
-        checkCPU(oldCPU,
-                 extraCycles: 2,
-                 pc: 0x0002,
-                 b: .newValue(0x42))
+        try await self.testProgram(program: [0x06, 0x42],
+                                   extraCycles: 2,
+                                   newPC: 0x0002,
+                                   newB: .newValue(0x42))
     }
 
     @Test mutating func ldCFromImmediate() async throws {
-        self.cpu.setProgram(program: [0x0E, 0x42])
-        let oldCPU = self.cpu
-
-        try self.cpu.executeInstruction()
-
-        checkCPU(oldCPU,
-                 extraCycles: 2,
-                 pc: 0x0002,
-                 c: .newValue(0x42))
+        try await self.testProgram(program: [0x0E, 0x42],
+                                   extraCycles: 2,
+                                   newPC: 0x0002,
+                                   newC: .newValue(0x42))
     }
 
     @Test mutating func ldDFromImmediate() async throws {
-        self.cpu.setProgram(program: [0x16, 0x42])
-        let oldCPU = self.cpu
-
-        try self.cpu.executeInstruction()
-
-        checkCPU(oldCPU,
-                 extraCycles: 2,
-                 pc: 0x0002,
-                 d: .newValue(0x42))
+        try await self.testProgram(program: [0x16, 0x42],
+                                   extraCycles: 2,
+                                   newPC: 0x0002,
+                                   newD: .newValue(0x42))
     }
 
     @Test mutating func ldEFromImmediate() async throws {
-        self.cpu.setProgram(program: [0x1E, 0x42])
-        let oldCPU = self.cpu
-
-        try self.cpu.executeInstruction()
-
-        checkCPU(oldCPU,
-                 extraCycles: 2,
-                 pc: 0x0002,
-                 e: .newValue(0x42))
+        try await self.testProgram(program: [0x1E, 0x42],
+                                   extraCycles: 2,
+                                   newPC: 0x0002,
+                                   newE: .newValue(0x42))
     }
 
     @Test mutating func ldHFromImmediate() async throws {
-        self.cpu.setProgram(program: [0x26, 0x42])
-        let oldCPU = self.cpu
-
-        try self.cpu.executeInstruction()
-
-        checkCPU(oldCPU,
-                 extraCycles: 2,
-                 pc: 0x0002,
-                 h: .newValue(0x42))
+        try await self.testProgram(program: [0x26, 0x42],
+                                   extraCycles: 2,
+                                   newPC: 0x0002,
+                                   newH: .newValue(0x42))
     }
 
     @Test mutating func ldLFromImmediate() async throws {
-        self.cpu.setProgram(program: [0x2E, 0x42])
-        let oldCPU = self.cpu
-
-        try self.cpu.executeInstruction()
-
-        checkCPU(oldCPU,
-                 extraCycles: 2,
-                 pc: 0x0002,
-                 l: .newValue(0x42))
+        try await self.testProgram(program: [0x2E, 0x42],
+                                   extraCycles: 2,
+                                   newPC: 0x0002,
+                                   newL: .newValue(0x42))
     }
 
     @Test mutating func ldHLIndirectFromImmediate() async throws {
-        self.cpu.setProgram(program: [0x36, 0x42, 0x00])
-        self.cpu.hl = 0x0002
-        let oldCPU = self.cpu
-
-        try self.cpu.executeInstruction()
-
-        checkCPU(oldCPU,
-                 extraCycles: 3,
-                 pc: 0x0002,
-                 memoryChanges: [0x0002 : 0x42])
+        try await self.testProgram(program: [0x36, 0x42, 0x00],
+                                   h: 0x00,
+                                   l: 0x02,
+                                   extraCycles: 3,
+                                   newPC: 0x0002,
+                                   memoryChanges: [0x0002 : 0x42])
     }
 
     @Test mutating func ldAFromImmediate() async throws {
-        self.cpu.setProgram(program: [0x3E, 0x42])
-        let oldCPU = self.cpu
-
-        try self.cpu.executeInstruction()
-
-        checkCPU(oldCPU,
-                 extraCycles: 2,
-                 pc: 0x0002,
-                 a: .newValue(0x42))
+        try await self.testProgram(program: [0x3E, 0x42],
+                                   extraCycles: 2,
+                                   newPC: 0x0002,
+                                   newA: .newValue(0x42))
     }
 
-
     @Test mutating func ldBCIndirectFromA() async throws {
-        self.cpu.bc = 0x0003
-        self.cpu.a = 0x42
-        self.cpu.setProgram(program: [0x02, 0x00, 0x00, 0x00])
-        let oldCPU = self.cpu
-
-        try self.cpu.executeInstruction()
-
-        checkCPU(oldCPU,
-                 extraCycles: 2,
-                 pc: 0x0001,
-                 memoryChanges: [0x0003 : 0x42])
+        try await self.testProgram(program: [0x02, 0x00, 0x00, 0x00],
+                                   a: 0x42,
+                                   b: 0x00,
+                                   c: 0x03,
+                                   extraCycles: 2,
+                                   newPC: 0x0001,
+                                   memoryChanges: [0x0003 : 0x42])
     }
 
     @Test mutating func ldDEIndirectFromA() async throws {
-        self.cpu.de = 0x0003
-        self.cpu.a = 0x42
-        self.cpu.setProgram(program: [0x12, 0x00, 0x00, 0x00])
-        let oldCPU = self.cpu
-
-        try self.cpu.executeInstruction()
-
-        checkCPU(oldCPU,
-                 extraCycles: 2,
-                 pc: 0x0001,
-                 memoryChanges: [0x0003 : 0x42])
+        try await self.testProgram(program: [0x12, 0x00, 0x00, 0x00],
+                                   a: 0x42,
+                                   d: 0x00,
+                                   e: 0x03,
+                                   extraCycles: 2,
+                                   newPC: 0x0001,
+                                   memoryChanges: [0x0003 : 0x42])
     }
 
 
     @Test mutating func ldHLIndirectFromAAndIncrement() async throws {
-        self.cpu.hl = 0x0003
-        self.cpu.a = 0x42
-        self.cpu.setProgram(program: [0x22, 0x00, 0x00, 0x00])
-        let oldCPU = self.cpu
-
-        try self.cpu.executeInstruction()
-
-        checkCPU(oldCPU,
-                 extraCycles: 2,
-                 pc: 0x0001,
-                 h: .unchanged,
-                 l: .newValue(0x04),
-                 memoryChanges: [0x0003 : 0x42])
+        try await self.testProgram(program: [0x22, 0x00, 0x00, 0x00],
+                                   a: 0x42,
+                                   h: 0x00,
+                                   l: 0x03,
+                                   extraCycles: 2,
+                                   newPC: 0x0001,
+                                   newH: .unchanged,
+                                   newL: .newValue(0x04),
+                                   memoryChanges: [0x0003 : 0x42])
     }
 
     @Test mutating func ldHLIndirectFromAAndDecrement() async throws {
-        self.cpu.hl = 0x0003
-        self.cpu.a = 0x42
-        self.cpu.setProgram(program: [0x32, 0x00, 0x00, 0x00])
-        let oldCPU = self.cpu
-
-        try self.cpu.executeInstruction()
-
-        checkCPU(oldCPU,
-                 extraCycles: 2,
-                 pc: 0x0001,
-                 h: .unchanged,
-                 l: .newValue(0x02),
-                 memoryChanges: [0x0003 : 0x42])
+        try await self.testProgram(program: [0x32, 0x00, 0x00, 0x00],
+                                   a: 0x42,
+                                   h: 0x00,
+                                   l: 0x03,
+                                   extraCycles: 2,
+                                   newPC: 0x0001,
+                                   newH: .unchanged,
+                                   newL: .newValue(0x02),
+                                   memoryChanges: [0x0003 : 0x42])
     }
 
     @Test mutating func ldAFromBCIndirect() async throws {
-        self.cpu.bc = 0x0003
-        self.cpu.setProgram(program: [0x0A, 0x00, 0x00, 0x42])
-        let oldCPU = self.cpu
-
-        try self.cpu.executeInstruction()
-
-        checkCPU(oldCPU,
-                 extraCycles: 2,
-                 pc: 0x0001,
-                 a: .newValue(0x42))
+        try await self.testProgram(program: [0x0A, 0x00, 0x00, 0x42],
+                                   b: 0x00,
+                                   c: 0x03,
+                                   extraCycles: 2,
+                                   newPC: 0x0001,
+                                   newA: .newValue(0x42))
     }
 
     @Test mutating func ldAFromDEIndirect() async throws {
-        self.cpu.de = 0x0003
-        self.cpu.setProgram(program: [0x1A, 0x00, 0x00, 0x42])
-        let oldCPU = self.cpu
-
-        try self.cpu.executeInstruction()
-
-        checkCPU(oldCPU,
-                 extraCycles: 2,
-                 pc: 0x0001,
-                 a: .newValue(0x42))
+        try await self.testProgram(program: [0x1A, 0x00, 0x00, 0x42],
+                                   d: 0x00,
+                                   e: 0x03,
+                                   extraCycles: 2,
+                                   newPC: 0x0001,
+                                   newA: .newValue(0x42))
     }
 
     @Test mutating func ldAFromHLIndirectAndIncrement() async throws {
-        self.cpu.hl = 0x0003
-        self.cpu.setProgram(program: [0x2A, 0x00, 0x00, 0x42])
-        let oldCPU = self.cpu
-
-        try self.cpu.executeInstruction()
-
-        checkCPU(oldCPU,
-                 extraCycles: 2,
-                 pc: 0x0001,
-                 a: .newValue(0x42),
-                 h: .unchanged,
-                 l: .newValue(0x04))
+        try await self.testProgram(program: [0x2A, 0x00, 0x00, 0x42],
+                                   h: 0x00,
+                                   l: 0x03,
+                                   extraCycles: 2,
+                                   newPC: 0x0001,
+                                   newA: .newValue(0x42),
+                                   newH: .unchanged,
+                                   newL: .newValue(0x04))
     }
 
     @Test mutating func ldAFromHLIndirectAndDecrement() async throws {
-        self.cpu.hl = 0x0003
-        self.cpu.setProgram(program: [0x3A, 0x00, 0x00, 0x42])
-        let oldCPU = self.cpu
-
-        try self.cpu.executeInstruction()
-
-        checkCPU(oldCPU,
-                 extraCycles: 2,
-                 pc: 0x0001,
-                 a: .newValue(0x42),
-                 h: .unchanged,
-                 l: .newValue(0x02))
+        try await self.testProgram(program: [0x3A, 0x00, 0x00, 0x42],
+                                   h: 0x00,
+                                   l: 0x03,
+                                   extraCycles: 2,
+                                   newPC: 0x0001,
+                                   newA: .newValue(0x42),
+                                   newH: .unchanged,
+                                   newL: .newValue(0x02))
     }
 
     @Test mutating func ldImmediateIndirectFromSP() async throws {
-        self.cpu.sp = 0x1234
-        self.cpu.setProgram(program: [0x08, 0x03, 0x00, 0x00, 0x00])
-        let oldCPU = self.cpu
-
-        try self.cpu.executeInstruction()
-
-        checkCPU(oldCPU,
-                 extraCycles: 5,
-                 pc: 0x0003,
-                 memoryChanges: [
-                    0x0003 : 0x34,
-                    0x0004 : 0x12
-                 ])
+        try await self.testProgram(program: [0x08, 0x03, 0x00, 0x00, 0x00],
+                                   sp: 0x1234,
+                                   extraCycles: 5,
+                                   newPC: 0x0003,
+                                   memoryChanges: [
+                                       0x0003 : 0x34,
+                                       0x0004 : 0x12])
     }
 
     @Test mutating func rlcaWithCarryAndZero() async throws {
-        self.cpu.a = 0x80
-        self.cpu.f = 0x00
-        self.cpu.setProgram(program: [0x07])
-        let oldCPU = self.cpu
-
-        try self.cpu.executeInstruction()
-
-        checkCPU(oldCPU,
-                 extraCycles: 1,
-                 pc: 0x0001,
-                 a: .newValue(0x00),
-                 f: .newValue(RegisterBit.zero.value | RegisterBit.carry.value))
+        try await self.testProgram(program: [0x07],
+                                   a: 0x80,
+                                   f: 0x00,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newA: .newValue(0x00),
+                                   newF: .newValue(RegisterBit.zero.value | RegisterBit.carry.value))
     }
 
     @Test mutating func rlcaWithCarryButNotZero() async throws {
-        self.cpu.a = 0xFF
-        self.cpu.f = 0x00
-        self.cpu.setProgram(program: [0x07])
-        let oldCPU = self.cpu
-
-        try self.cpu.executeInstruction()
-
-        checkCPU(oldCPU,
-                 extraCycles: 1,
-                 pc: 0x0001,
-                 a: .newValue(0xFE),
-                 f: .newValue(RegisterBit.carry.value))
+        try await self.testProgram(program: [0x07],
+                                   a: 0xFF,
+                                   f: 0x00,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newA: .newValue(0xFE),
+                                   newF: .newValue(RegisterBit.carry.value))
     }
 
     @Test mutating func rlcaWithZeroButNotCarry() async throws {
-        self.cpu.a = 0x00
-        self.cpu.f = 0x00
-        self.cpu.setProgram(program: [0x07])
-        let oldCPU = self.cpu
-
-        try self.cpu.executeInstruction()
-
-        checkCPU(oldCPU,
-                 extraCycles: 1,
-                 pc: 0x0001,
-                 a: .newValue(0x00),
-                 f: .newValue(RegisterBit.zero.value))
+        try await self.testProgram(program: [0x07],
+                                   a: 0x00,
+                                   f: 0x00,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newA: .newValue(0x00),
+                                   newF: .newValue(RegisterBit.zero.value))
     }
 
     @Test mutating func rlcaWithNoFlagsSet() async throws {
-        self.cpu.a = 0x01
-        self.cpu.f = 0x00
-        self.cpu.setProgram(program: [0x07])
-        let oldCPU = self.cpu
-
-        try self.cpu.executeInstruction()
-
-        checkCPU(oldCPU,
-                 extraCycles: 1,
-                 pc: 0x0001,
-                 a: .newValue(0x02),
-                 f: .unchanged)
+        try await self.testProgram(program: [0x07],
+                                   a: 0x01,
+                                   f: 0x00,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newA: .newValue(0x02),
+                                   newF: .unchanged)
     }
 
     @Test mutating func rrcaWithCarryAndZero() async throws {
-        self.cpu.a = 0x01
-        self.cpu.f = 0x00
-        self.cpu.setProgram(program: [0x0F])
-        let oldCPU = self.cpu
-
-        try self.cpu.executeInstruction()
-
-        checkCPU(oldCPU,
-                 extraCycles: 1,
-                 pc: 0x0001,
-                 a: .newValue(0x00),
-                 f: .newValue(RegisterBit.zero.value | RegisterBit.carry.value))
+        try await self.testProgram(program: [0x0F],
+                                   a: 0x01,
+                                   f: 0x00,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newA: .newValue(0x00),
+                                   newF: .newValue(RegisterBit.zero.value | RegisterBit.carry.value))
     }
 
     @Test mutating func rrcaWithCarryButNotZero() async throws {
-        self.cpu.a = 0xFF
-        self.cpu.f = 0x00
-        self.cpu.setProgram(program: [0x0F])
-        let oldCPU = self.cpu
-
-        try self.cpu.executeInstruction()
-
-        checkCPU(oldCPU,
-                 extraCycles: 1,
-                 pc: 0x0001,
-                 a: .newValue(0x7F),
-                 f: .newValue(RegisterBit.carry.value))
+        try await self.testProgram(program: [0x0F],
+                                   a: 0xFF,
+                                   f: 0x00,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newA: .newValue(0x7F),
+                                   newF: .newValue(RegisterBit.carry.value))
     }
 
     @Test mutating func rrcaWithZeroButNotCarry() async throws {
-        self.cpu.a = 0x00
-        self.cpu.f = 0x00
-        self.cpu.setProgram(program: [0x0F])
-        let oldCPU = self.cpu
-
-        try self.cpu.executeInstruction()
-
-        checkCPU(oldCPU,
-                 extraCycles: 1,
-                 pc: 0x0001,
-                 a: .newValue(0x00),
-                 f: .newValue(RegisterBit.zero.value))
+        try await self.testProgram(program: [0x0F],
+                                   a: 0x00,
+                                   f: 0x00,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newA: .newValue(0x00),
+                                   newF: .newValue(RegisterBit.zero.value))
     }
 
     @Test mutating func rrcaWithNoFlagsSet() async throws {
-        self.cpu.a = 0x80
-        self.cpu.f = 0x00
-        self.cpu.setProgram(program: [0x0F])
-        let oldCPU = self.cpu
-
-        try self.cpu.executeInstruction()
-
-        checkCPU(oldCPU,
-                 extraCycles: 1,
-                 pc: 0x0001,
-                 a: .newValue(0x40),
-                 f: .unchanged)
+        try await self.testProgram(program: [0x0F],
+                                   a: 0x80,
+                                   f: 0x00,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newA: .newValue(0x40),
+                                   newF: .unchanged)
     }
 
     @Test mutating func rlaWithCarryAndZero() async throws {
-        self.cpu.a = 0x80
-        self.cpu.f = 0x00
-        self.cpu.setProgram(program: [0x17])
-        let oldCPU = self.cpu
-
-        try self.cpu.executeInstruction()
-
-        checkCPU(oldCPU,
-                 extraCycles: 1,
-                 pc: 0x0001,
-                 a: .newValue(0x00),
-                 f: .newValue(RegisterBit.zero.value | RegisterBit.carry.value))
+        try await self.testProgram(program: [0x17],
+                                   a: 0x80,
+                                   f: 0x00,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newA: .newValue(0x00),
+                                   newF: .newValue(RegisterBit.zero.value | RegisterBit.carry.value))
     }
 
     @Test mutating func rlaWithCarryButNotZero() async throws {
-        self.cpu.a = 0xFF
-        self.cpu.f = 0x00
-        self.cpu.setProgram(program: [0x17])
-        let oldCPU = self.cpu
-
-        try self.cpu.executeInstruction()
-
-        checkCPU(oldCPU,
-                 extraCycles: 1,
-                 pc: 0x0001,
-                 a: .newValue(0xFE),
-                 f: .newValue(RegisterBit.carry.value))
+        try await self.testProgram(program: [0x17],
+                                   a: 0xFF,
+                                   f: 0x00,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newA: .newValue(0xFE),
+                                   newF: .newValue(RegisterBit.carry.value))
     }
 
     @Test mutating func rlaWithZeroButNotCarry() async throws {
-        self.cpu.a = 0x00
-        self.cpu.f = 0x00
-        self.cpu.setProgram(program: [0x17])
-        let oldCPU = self.cpu
-
-        try self.cpu.executeInstruction()
-
-        checkCPU(oldCPU,
-                 extraCycles: 1,
-                 pc: 0x0001,
-                 a: .newValue(0x00),
-                 f: .newValue(RegisterBit.zero.value))
+        try await self.testProgram(program: [0x17],
+                                   a: 0x00,
+                                   f: 0x00,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newA: .newValue(0x00),
+                                   newF: .newValue(RegisterBit.zero.value))
     }
 
     @Test mutating func rlaWithNoFlagsSet() async throws {
-        self.cpu.a = 0x01
-        self.cpu.f = 0x00
-        self.cpu.setProgram(program: [0x17])
-        let oldCPU = self.cpu
-
-        try self.cpu.executeInstruction()
-
-        checkCPU(oldCPU,
-                 extraCycles: 1,
-                 pc: 0x0001,
-                 a: .newValue(0x02),
-                 f: .unchanged)
+        try await self.testProgram(program: [0x17],
+                                   a: 0x01,
+                                   f: 0x00,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newA: .newValue(0x02),
+                                   newF: .unchanged)
     }
 
     @Test mutating func rlaWithOldCarryRotatedIn() async throws {
-        self.cpu.a = 0x00
-        self.cpu.f[.carry] = true
-        self.cpu.setProgram(program: [0x17])
-        let oldCPU = self.cpu
-
-        try self.cpu.executeInstruction()
-
-        checkCPU(oldCPU,
-                 extraCycles: 1,
-                 pc: 0x0001,
-                 a: .newValue(0x01),
-                 f: .newValue(0x00))
+        try await self.testProgram(program: [0x17],
+                                   a: 0x00,
+                                   f: 0x10,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newA: .newValue(0x01),
+                                   newF: .newValue(0x00))
     }
 
     @Test mutating func rraWithCarryAndZero() async throws {
-        self.cpu.a = 0x01
-        self.cpu.f = 0x00
-        self.cpu.setProgram(program: [0x1F])
-        let oldCPU = self.cpu
-
-        try self.cpu.executeInstruction()
-
-        checkCPU(oldCPU,
-                 extraCycles: 1,
-                 pc: 0x0001,
-                 a: .newValue(0x00),
-                 f: .newValue(RegisterBit.zero.value | RegisterBit.carry.value))
+        try await self.testProgram(program: [0x1F],
+                                   a: 0x01,
+                                   f: 0x00,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newA: .newValue(0x00),
+                                   newF: .newValue(RegisterBit.zero.value | RegisterBit.carry.value))
     }
 
     @Test mutating func rraWithCarryButNotZero() async throws {
-        self.cpu.a = 0xFF
-        self.cpu.f = 0x00
-        self.cpu.setProgram(program: [0x1F])
-        let oldCPU = self.cpu
-
-        try self.cpu.executeInstruction()
-
-        checkCPU(oldCPU,
-                 extraCycles: 1,
-                 pc: 0x0001,
-                 a: .newValue(0x7F),
-                 f: .newValue(RegisterBit.carry.value))
+        try await self.testProgram(program: [0x1F],
+                                   a: 0xFF,
+                                   f: 0x00,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newA: .newValue(0x7F),
+                                   newF: .newValue(RegisterBit.carry.value))
     }
 
     @Test mutating func rraWithZeroButNotCarry() async throws {
-        self.cpu.a = 0x00
-        self.cpu.f = 0x00
-        self.cpu.setProgram(program: [0x1F])
-        let oldCPU = self.cpu
-
-        try self.cpu.executeInstruction()
-
-        checkCPU(oldCPU,
-                 extraCycles: 1,
-                 pc: 0x0001,
-                 a: .newValue(0x00),
-                 f: .newValue(RegisterBit.zero.value))
+        try await self.testProgram(program: [0x1F],
+                                   a: 0x00,
+                                   f: 0x00,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newA: .unchanged,
+                                   newF: .newValue(RegisterBit.zero.value))
     }
 
     @Test mutating func rraWithNoFlagsSet() async throws {
-        self.cpu.a = 0x80
-        self.cpu.f = 0x00
-        self.cpu.setProgram(program: [0x1F])
-        let oldCPU = self.cpu
-
-        try self.cpu.executeInstruction()
-
-        checkCPU(oldCPU,
-                 extraCycles: 1,
-                 pc: 0x0001,
-                 a: .newValue(0x40),
-                 f: .unchanged)
+        try await self.testProgram(program: [0x1F],
+                                   a: 0x80,
+                                   f: 0x00,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newA: .newValue(0x40),
+                                   newF: .unchanged)
     }
 
     @Test mutating func rraWithOldCarryRotatedIn() async throws {
-        self.cpu.a = 0x00
-        self.cpu.f[.carry] = true
-        self.cpu.setProgram(program: [0x1F])
-        let oldCPU = self.cpu
-
-        try self.cpu.executeInstruction()
-
-        checkCPU(oldCPU,
-                 extraCycles: 1,
-                 pc: 0x0001,
-                 a: .newValue(0x80),
-                 f: .newValue(0x00))
+        try await self.testProgram(program: [0x1F],
+                                   a: 0x00,
+                                   f: 0x10,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newA: .newValue(0x80),
+                                   newF: .newValue(0x00))
     }
 
     @Test mutating func daaAfterAdditionNoCorrectionNeeded() async throws {
-        self.cpu.a = 0x01
-        self.cpu.f[.carry] = false
-        self.cpu.f[.subtraction] = false
-        self.cpu.setProgram(program: [0x27])
-        let oldCPU = self.cpu
-
-        try self.cpu.executeInstruction()
-
-        checkCPU(oldCPU,
-                 extraCycles: 1,
-                 pc: 0x0001,
-                 a: .unchanged,
-                 f: .unchanged)
+        try await self.testProgram(program: [0x27],
+                                   a: 0x01,
+                                   f: 0x00,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newA: .unchanged,
+                                   newF: .unchanged)
     }
 
     @Test mutating func daaAfterAdditionZeroResult() async throws {
-        self.cpu.a = 0x00
-        self.cpu.f[.carry] = false
-        self.cpu.f[.subtraction] = false
-        self.cpu.setProgram(program: [0x27])
-        let oldCPU = self.cpu
-
-        try self.cpu.executeInstruction()
-
-        checkCPU(oldCPU,
-                 extraCycles: 1,
-                 pc: 0x0001,
-                 a: .unchanged,
-                 f: .newValue(RegisterBit.zero.value))
+        try await self.testProgram(program: [0x27],
+                                   a: 0x00,
+                                   f: 0x00,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newA: .unchanged,
+                                   newF: .newValue(RegisterBit.zero.value))
     }
 
     @Test mutating func daaAfterAdditionOnesDigitCorrected() async throws {
-        self.cpu.a = 0x0F
-        self.cpu.f[.carry] = false
-        self.cpu.f[.subtraction] = false
-        self.cpu.setProgram(program: [0x27])
-        let oldCPU = self.cpu
-
-        try self.cpu.executeInstruction()
-
-        checkCPU(oldCPU,
-                 extraCycles: 1,
-                 pc: 0x0001,
-                 a: .newValue(0x15),
-                 f: .unchanged)
+        try await self.testProgram(program: [0x27],
+                                   a: 0x0F,
+                                   f: 0x00,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newA: .newValue(0x15),
+                                   newF: .unchanged)
     }
 
     @Test mutating func daaAfterAdditionTensDigitCorrected() async throws {
-        self.cpu.a = 0xF0
-        self.cpu.f[.carry] = false
-        self.cpu.f[.subtraction] = false
-        self.cpu.setProgram(program: [0x27])
-        let oldCPU = self.cpu
-
-        try self.cpu.executeInstruction()
-
-        checkCPU(oldCPU,
-                 extraCycles: 1,
-                 pc: 0x0001,
-                 a: .newValue(0x50),
-                 f: .newValue(RegisterBit.carry.value))
+        try await self.testProgram(program: [0x27],
+                                   a: 0xF0,
+                                   f: 0x00,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newA: .newValue(0x50),
+                                   newF: .newValue(RegisterBit.carry.value))
     }
 
     @Test mutating func daaAfterAdditionBothDigitsCorrected() async throws {
-        self.cpu.a = 0x9C
-        self.cpu.f[.carry] = false
-        self.cpu.f[.subtraction] = false
-        self.cpu.setProgram(program: [0x27])
-        let oldCPU = self.cpu
-
-        try self.cpu.executeInstruction()
-
-        checkCPU(oldCPU,
-                 extraCycles: 1,
-                 pc: 0x0001,
-                 a: .newValue(0x02),
-                 f: .newValue(RegisterBit.carry.value))
+        try await self.testProgram(program: [0x27],
+                                   a: 0x9C,
+                                   f: 0x00,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newA: .newValue(0x02),
+                                   newF: .newValue(RegisterBit.carry.value))
     }
 
     @Test mutating func daaAfterSubtractionNoCorrectionNeeded() async throws {
-        self.cpu.a = 0x09
-        self.cpu.f[.carry] = false
-        self.cpu.f[.subtraction] = true
-        self.cpu.setProgram(program: [0x27])
-        let oldCPU = self.cpu
-
-        try self.cpu.executeInstruction()
-
-        checkCPU(oldCPU,
-                 extraCycles: 1,
-                 pc: 0x0001,
-                 a: .unchanged,
-                 f: .unchanged)
+        try await self.testProgram(program: [0x27],
+                                   a: 0x09,
+                                   f: 0x40,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newA: .unchanged,
+                                   newF: .unchanged)
     }
 
     @Test mutating func daaAfterSubtractionOnesDigitCorrected() async throws {
-        self.cpu.a = 0x0D
-        self.cpu.f[.carry] = false
-        self.cpu.f[.halfCarry] = true
-        self.cpu.f[.subtraction] = true
-        self.cpu.setProgram(program: [0x27])
-        let oldCPU = self.cpu
-
-        try self.cpu.executeInstruction()
-
-        checkCPU(oldCPU,
-                 extraCycles: 1,
-                 pc: 0x0001,
-                 a: .newValue(0x07),
-                 f: .newValue(RegisterBit.subtraction.value))
+        try await self.testProgram(program: [0x27],
+                                   a: 0x0D,
+                                   f: 0x60,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newA: .newValue(0x07),
+                                   newF: .newValue(RegisterBit.subtraction.value))
     }
 
     @Test mutating func daaAfterSubtractionTensDigitCorrected() async throws {
-        self.cpu.a = 0xE4
-        self.cpu.f[.carry] = true
-        self.cpu.f[.halfCarry] = false
-        self.cpu.f[.subtraction] = true
-        self.cpu.setProgram(program: [0x27])
-        let oldCPU = self.cpu
-
-        try self.cpu.executeInstruction()
-
-        checkCPU(oldCPU,
-                 extraCycles: 1,
-                 pc: 0x0001,
-                 a: .newValue(0x84),
-                 f: .newValue(RegisterBit.subtraction.value | RegisterBit.carry.value))
+        try await self.testProgram(program: [0x27],
+                                   a: 0xE4,
+                                   f: 0x50,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newA: .newValue(0x84),
+                                   newF: .newValue(RegisterBit.subtraction.value | RegisterBit.carry.value))
     }
 
     @Test mutating func cpl() async throws {
-        self.cpu.a = 0x00
-        self.cpu.setProgram(program: [0x2F])
-        let oldCPU = self.cpu
-
-        try self.cpu.executeInstruction()
-
-        checkCPU(oldCPU,
-                 extraCycles: 1,
-                 pc: 0x0001,
-                 a: .newValue(0xFF),
-                 f: .newValue(RegisterBit.halfCarry.value | RegisterBit.subtraction.value))
+        try await self.testProgram(program: [0x2F],
+                                   a: 0x00,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newA: .newValue(0xFF),
+                                   newF: .newValue(RegisterBit.subtraction.value | RegisterBit.halfCarry.value))
     }
 
     @Test mutating func scf() async throws {
-        self.cpu.setProgram(program: [0x37])
-        let oldCPU = self.cpu
-
-        try self.cpu.executeInstruction()
-
-        checkCPU(oldCPU,
-                 extraCycles: 1,
-                 pc: 0x0001,
-                 f: .newValue(RegisterBit.carry.value))
+        try await self.testProgram(program: [0x37],
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newF: .newValue(RegisterBit.carry.value))
     }
 
     @Test mutating func ccfSetCarry() async throws {
-        self.cpu.setProgram(program: [0x3F])
-        let oldCPU = self.cpu
-
-        try self.cpu.executeInstruction()
-
-        checkCPU(oldCPU,
-                 extraCycles: 1,
-                 pc: 0x0001,
-                 f: .newValue(RegisterBit.carry.value))
+        try await self.testProgram(program: [0x3F],
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newF: .newValue(RegisterBit.carry.value))
     }
 
     @Test mutating func ccfResetCarry() async throws {
-        self.cpu.f[.carry] = true
-        self.cpu.setProgram(program: [0x3F])
-        let oldCPU = self.cpu
-
-        try self.cpu.executeInstruction()
-
-        checkCPU(oldCPU,
-                 extraCycles: 1,
-                 pc: 0x0001,
-                 f: .newValue(0x00))
+        try await self.testProgram(program: [0x3F],
+                                   f: 0x10,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newF: .newValue(0x00))
     }
 
     @Test mutating func incBC() async throws {
-        self.cpu.bc = 0x1234
-        self.cpu.setProgram(program: [0x03])
-        let oldCPU = self.cpu
-
-        try self.cpu.executeInstruction()
-
-        checkCPU(oldCPU,
-                 extraCycles: 2,
-                 pc: 0x0001,
-                 b: .unchanged,
-                 c: .newValue(0x35))
+        try await self.testProgram(program: [0x03],
+                                   b: 0x12,
+                                   c: 0x34,
+                                   extraCycles: 2,
+                                   newPC: 0x0001,
+                                   newB: .unchanged,
+                                   newC: .newValue(0x35))
     }
 
     @Test mutating func incDE() async throws {
-        self.cpu.de = 0x1234
-        self.cpu.setProgram(program: [0x13])
-        let oldCPU = self.cpu
-
-        try self.cpu.executeInstruction()
-
-        checkCPU(oldCPU,
-                 extraCycles: 2,
-                 pc: 0x0001,
-                 d: .unchanged,
-                 e: .newValue(0x35))
+        try await self.testProgram(program: [0x13],
+                                   d: 0x12,
+                                   e: 0x34,
+                                   extraCycles: 2,
+                                   newPC: 0x0001,
+                                   newD: .unchanged,
+                                   newE: .newValue(0x35))
     }
 
     @Test mutating func incHL() async throws {
-        self.cpu.hl = 0xFFFF
-        self.cpu.setProgram(program: [0x23])
-        let oldCPU = self.cpu
-
-        try self.cpu.executeInstruction()
-
-        checkCPU(oldCPU,
-                 extraCycles: 2,
-                 pc: 0x0001,
-                 h: .newValue(0x00),
-                 l: .newValue(0x00))
+        try await self.testProgram(program: [0x23],
+                                   h: 0xFF,
+                                   l: 0xFF,
+                                   extraCycles: 2,
+                                   newPC: 0x0001,
+                                   newH: .newValue(0x00),
+                                   newL: .newValue(0x00))
     }
 
     @Test mutating func incSP() async throws {
-        self.cpu.sp = 0x1234
-        self.cpu.setProgram(program: [0x33])
-        let oldCPU = self.cpu
-
-        try self.cpu.executeInstruction()
-
-        checkCPU(oldCPU,
-                 extraCycles: 2,
-                 pc: 0x0001,
-                 sp: .newValue(0x1235))
+        try await self.testProgram(program: [0x33],
+                                   sp: 0x1234,
+                                   extraCycles: 2,
+                                   newPC: 0x0001,
+                                   newSP: .newValue(0x1235))
     }
 
     @Test mutating func incB() async throws {
-        self.cpu.b = 0x0F
-        self.cpu.setProgram(program: [0x04])
-        let oldCPU = self.cpu
-
-        try self.cpu.executeInstruction()
-
-        checkCPU(oldCPU,
-                 extraCycles: 1,
-                 pc: 0x0001,
-                 f: .newValue(RegisterBit.halfCarry.value),
-                 b: .newValue(0x10))
+        try await self.testProgram(program: [0x04],
+                                   b: 0x0F,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newF: .newValue(RegisterBit.halfCarry.value),
+                                   newB: .newValue(0x10))
     }
 
     @Test mutating func incC() async throws {
-        self.cpu.c = 0xFF
-        self.cpu.setProgram(program: [0x0C])
-        let oldCPU = self.cpu
-
-        try self.cpu.executeInstruction()
-
-        checkCPU(oldCPU,
-                 extraCycles: 1,
-                 pc: 0x0001,
-                 f: .newValue(RegisterBit.zero.value | RegisterBit.carry.value | RegisterBit.halfCarry.value),
-                 c: .newValue(0x00))
+        try await self.testProgram(program: [0x0C],
+                                   c: 0xFF,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newF: .newValue(RegisterBit.zero.value | RegisterBit.carry.value | RegisterBit.halfCarry.value),
+                                   newC: .newValue(0x00))
     }
 
     @Test mutating func incD() async throws {
-        self.cpu.d = 0x41
-        self.cpu.setProgram(program: [0x14])
-        let oldCPU = self.cpu
-
-        try self.cpu.executeInstruction()
-
-        checkCPU(oldCPU,
-                 extraCycles: 1,
-                 pc: 0x0001,
-                 f: .unchanged,
-                 d: .newValue(0x42))
+        try await self.testProgram(program: [0x14],
+                                   d: 0x41,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newF: .unchanged,
+                                   newD: .newValue(0x42))
     }
 
     @Test mutating func incE() async throws {
-        self.cpu.e = 0x41
-        self.cpu.setProgram(program: [0x1C])
-        let oldCPU = self.cpu
-
-        try self.cpu.executeInstruction()
-
-        checkCPU(oldCPU,
-                 extraCycles: 1,
-                 pc: 0x0001,
-                 f: .unchanged,
-                 e: .newValue(0x42))
+        try await self.testProgram(program: [0x1C],
+                                   e: 0x41,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newF: .unchanged,
+                                   newE: .newValue(0x42))
     }
 
     @Test mutating func incH() async throws {
-        self.cpu.h = 0x41
-        self.cpu.setProgram(program: [0x24])
-        let oldCPU = self.cpu
-
-        try self.cpu.executeInstruction()
-
-        checkCPU(oldCPU,
-                 extraCycles: 1,
-                 pc: 0x0001,
-                 f: .unchanged,
-                 h: .newValue(0x42))
+        try await self.testProgram(program: [0x24],
+                                   h: 0x41,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newF: .unchanged,
+                                   newH: .newValue(0x42))
     }
 
     @Test mutating func incL() async throws {
-        self.cpu.l = 0x41
-        self.cpu.setProgram(program: [0x2C])
-        let oldCPU = self.cpu
-
-        try self.cpu.executeInstruction()
-
-        checkCPU(oldCPU,
-                 extraCycles: 1,
-                 pc: 0x0001,
-                 f: .unchanged,
-                 l: .newValue(0x42))
+        try await self.testProgram(program: [0x2C],
+                                   l: 0x41,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newF: .unchanged,
+                                   newL: .newValue(0x42))
     }
 
     @Test mutating func incHLIndirect() async throws {
-        self.cpu.hl = 0x0001
-        self.cpu.setProgram(program: [0x34, 0xFF])
-        let oldCPU = self.cpu
-
-        try self.cpu.executeInstruction()
-
-        checkCPU(oldCPU,
-                 extraCycles: 3,
-                 pc: 0x0001,
-                 f: .newValue(RegisterBit.zero.value | RegisterBit.carry.value | RegisterBit.halfCarry.value),
-                 memoryChanges: [0x0001: 0x00])
+        try await self.testProgram(program: [0x34, 0xFF],
+                                   h: 0x00,
+                                   l: 0x01,
+                                   extraCycles: 3,
+                                   newPC: 0x0001,
+                                   newF: .newValue(RegisterBit.zero.value | RegisterBit.carry.value | RegisterBit.halfCarry.value),
+                                   memoryChanges: [0x0001: 0x00])
     }
 
     @Test mutating func incA() async throws {
-        self.cpu.a = 0x41
-        self.cpu.setProgram(program: [0x3C])
-        let oldCPU = self.cpu
-
-        try self.cpu.executeInstruction()
-
-        checkCPU(oldCPU,
-                 extraCycles: 1,
-                 pc: 0x0001,
-                 a: .newValue(0x42),
-                 f: .unchanged)
+        try await self.testProgram(program: [0x3C],
+                                   a: 0x41,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newA: .newValue(0x42),
+                                   newF: .unchanged)
     }
 
     @Test mutating func decBC() async throws {
-        self.cpu.bc = 0x1234
-        self.cpu.setProgram(program: [0x0B])
-        let oldCPU = self.cpu
-
-        try self.cpu.executeInstruction()
-
-        checkCPU(oldCPU,
-                 extraCycles: 2,
-                 pc: 0x0001,
-                 b: .unchanged,
-                 c: .newValue(0x33))
+        try await self.testProgram(program: [0x0B],
+                                   b: 0x12,
+                                   c: 0x34,
+                                   extraCycles: 2,
+                                   newPC: 0x0001,
+                                   newB: .unchanged,
+                                   newC: .newValue(0x33))
     }
 
     @Test mutating func decDE() async throws {
-        self.cpu.de = 0x1234
-        self.cpu.setProgram(program: [0x1B])
-        let oldCPU = self.cpu
-
-        try self.cpu.executeInstruction()
-
-        checkCPU(oldCPU,
-                 extraCycles: 2,
-                 pc: 0x0001,
-                 d: .unchanged,
-                 e: .newValue(0x33))
+        try await self.testProgram(program: [0x1B],
+                                   d: 0x12,
+                                   e: 0x34,
+                                   extraCycles: 2,
+                                   newPC: 0x0001,
+                                   newD: .unchanged,
+                                   newE: .newValue(0x33))
     }
 
     @Test mutating func decHL() async throws {
-        self.cpu.hl = 0x0000
-        self.cpu.setProgram(program: [0x2B])
-        let oldCPU = self.cpu
-
-        try self.cpu.executeInstruction()
-
-        checkCPU(oldCPU,
-                 extraCycles: 2,
-                 pc: 0x0001,
-                 h: .newValue(0xFF),
-                 l: .newValue(0xFF))
+        try await self.testProgram(program: [0x2B],
+                                   h: 0x00,
+                                   l: 0x00,
+                                   extraCycles: 2,
+                                   newPC: 0x0001,
+                                   newH: .newValue(0xFF),
+                                   newL: .newValue(0xFF))
     }
 
     @Test mutating func decSP() async throws {
-        self.cpu.sp = 0x1234
-        self.cpu.setProgram(program: [0x3B])
-        let oldCPU = self.cpu
-
-        try self.cpu.executeInstruction()
-
-        checkCPU(oldCPU,
-                 extraCycles: 2,
-                 pc: 0x0001,
-                 sp: .newValue(0x1233))
+        try await self.testProgram(program: [0x3B],
+                                   sp: 0x1234,
+                                   extraCycles: 2,
+                                   newPC: 0x0001,
+                                   newSP: .newValue(0x1233))
     }
 
     @Test mutating func decB() async throws {
-        self.cpu.b = 0x0F
-        self.cpu.setProgram(program: [0x05])
-        let oldCPU = self.cpu
-
-        try self.cpu.executeInstruction()
-
-        checkCPU(oldCPU,
-                 extraCycles: 1,
-                 pc: 0x0001,
-                 f: .newValue(RegisterBit.subtraction.value | RegisterBit.halfCarry.value),
-                 b: .newValue(0x0E))
+        try await self.testProgram(program: [0x05],
+                                   b: 0x0F,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newF: .newValue(RegisterBit.subtraction.value | RegisterBit.halfCarry.value),
+                                   newB: .newValue(0x0E))
     }
 
     @Test mutating func decC() async throws {
-        self.cpu.c = 0x10
-        self.cpu.setProgram(program: [0x0D])
-        let oldCPU = self.cpu
-
-        try self.cpu.executeInstruction()
-
-        checkCPU(oldCPU,
-                 extraCycles: 1,
-                 pc: 0x0001,
-                 f: .newValue(RegisterBit.subtraction.value),
-                 c: .newValue(0x0F))
+        try await self.testProgram(program: [0x0D],
+                                   c: 0x10,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newF: .newValue(RegisterBit.subtraction.value),
+                                   newC: .newValue(0x0F))
     }
 
     @Test mutating func decD() async throws {
-        self.cpu.d = 0x01
-        self.cpu.setProgram(program: [0x15])
-        let oldCPU = self.cpu
-
-        try self.cpu.executeInstruction()
-
-        checkCPU(oldCPU,
-                 extraCycles: 1,
-                 pc: 0x0001,
-                 f: .newValue(RegisterBit.subtraction.value | RegisterBit.halfCarry.value | RegisterBit.zero.value),
-                 d: .newValue(0x00))
+        try await self.testProgram(program: [0x15],
+                                   d: 0x01,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newF: .newValue(RegisterBit.subtraction.value | RegisterBit.halfCarry.value | RegisterBit.zero.value),
+                                   newD: .newValue(0x00))
     }
 
     @Test mutating func decE() async throws {
-        self.cpu.e = 0x43
-        self.cpu.setProgram(program: [0x1D])
-        let oldCPU = self.cpu
-
-        try self.cpu.executeInstruction()
-
-        checkCPU(oldCPU,
-                 extraCycles: 1,
-                 pc: 0x0001,
-                 f: .newValue(RegisterBit.subtraction.value | RegisterBit.halfCarry.value),
-                 e: .newValue(0x42))
+        try await self.testProgram(program: [0x1D],
+                                   e: 0x43,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newF: .newValue(RegisterBit.subtraction.value | RegisterBit.halfCarry.value),
+                                   newE: .newValue(0x42))
     }
 
     @Test mutating func decH() async throws {
-        self.cpu.h = 0x43
-        self.cpu.setProgram(program: [0x25])
-        let oldCPU = self.cpu
-
-        try self.cpu.executeInstruction()
-
-        checkCPU(oldCPU,
-                 extraCycles: 1,
-                 pc: 0x0001,
-                 f: .newValue(RegisterBit.subtraction.value | RegisterBit.halfCarry.value),
-                 h: .newValue(0x42))
+        try await self.testProgram(program: [0x25],
+                                   h: 0x43,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newF: .newValue(RegisterBit.subtraction.value | RegisterBit.halfCarry.value),
+                                   newH: .newValue(0x42))
     }
 
     @Test mutating func decL() async throws {
-        self.cpu.l = 0x43
-        self.cpu.setProgram(program: [0x2D])
-        let oldCPU = self.cpu
-
-        try self.cpu.executeInstruction()
-
-        checkCPU(oldCPU,
-                 extraCycles: 1,
-                 pc: 0x0001,
-                 f: .newValue(RegisterBit.subtraction.value | RegisterBit.halfCarry.value),
-                 l: .newValue(0x42))
+        try await self.testProgram(program: [0x2D],
+                                   l: 0x43,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newF: .newValue(RegisterBit.subtraction.value | RegisterBit.halfCarry.value),
+                                   newL: .newValue(0x42))
     }
 
     @Test mutating func decHLIndirect() async throws {
-        self.cpu.hl = 0x0001
-        self.cpu.setProgram(program: [0x35, 0x43])
-        let oldCPU = self.cpu
-
-        try self.cpu.executeInstruction()
-
-        checkCPU(oldCPU,
-                 extraCycles: 3,
-                 pc: 0x0001,
-                 f: .newValue(RegisterBit.subtraction.value | RegisterBit.halfCarry.value),
-                 memoryChanges: [0x0001: 0x42])
+        try await self.testProgram(program: [0x35, 0x43],
+                                   h: 0x00,
+                                   l: 0x01,
+                                   extraCycles: 3,
+                                   newPC: 0x0001,
+                                   newF: .newValue(RegisterBit.subtraction.value | RegisterBit.halfCarry.value),
+                                   memoryChanges: [0x0001: 0x42])
     }
 
     @Test mutating func decA() async throws {
-        self.cpu.a = 0x43
-        self.cpu.setProgram(program: [0x3D])
-        let oldCPU = self.cpu
-
-        try self.cpu.executeInstruction()
-
-        checkCPU(oldCPU,
-                 extraCycles: 1,
-                 pc: 0x0001,
-                 a: .newValue(0x42),
-                 f: .newValue(RegisterBit.subtraction.value | RegisterBit.halfCarry.value))
+        try await self.testProgram(program: [0x3D],
+                                   a: 0x43,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newA: .newValue(0x42),
+                                   newF: .newValue(RegisterBit.subtraction.value | RegisterBit.halfCarry.value))
     }
 
     @Test mutating func addBCToHL() async throws {
-        self.cpu.bc = 0x0102
-        self.cpu.hl = 0x0304
-        self.cpu.setProgram(program: [0x09])
-        let oldCPU = self.cpu
-
-        try self.cpu.executeInstruction()
-
-        checkCPU(oldCPU,
-                 extraCycles: 2,
-                 pc: 0x0001,
-                 f: .unchanged,
-                 h: .newValue(0x04),
-                 l: .newValue(0x06))
+        try await self.testProgram(program: [0x09],
+                                   b: 0x01,
+                                   c: 0x02,
+                                   h: 0x03,
+                                   l: 0x04,
+                                   extraCycles: 2,
+                                   newPC: 0x0001,
+                                   newB: .unchanged,
+                                   newC: .unchanged,
+                                   newH: .newValue(0x04),
+                                   newL: .newValue(0x06))
     }
 
     @Test mutating func addDEToHL() async throws {
-        self.cpu.de = 0x0F01
-        self.cpu.hl = 0x0102
-        self.cpu.setProgram(program: [0x19])
-        let oldCPU = self.cpu
-
-        try self.cpu.executeInstruction()
-
-        checkCPU(oldCPU,
-                 extraCycles: 2,
-                 pc: 0x0001,
-                 f: .newValue(RegisterBit.halfCarry.value),
-                 h: .newValue(0x10),
-                 l: .newValue(0x03))
+        try await self.testProgram(program: [0x19],
+                                   d: 0x0F,
+                                   e: 0x01,
+                                   h: 0x01,
+                                   l: 0x02,
+                                   extraCycles: 2,
+                                   newPC: 0x0001,
+                                   newF: .newValue(RegisterBit.halfCarry.value),
+                                   newD: .unchanged,
+                                   newE: .unchanged,
+                                   newH: .newValue(0x10),
+                                   newL: .newValue(0x03))
     }
 
     @Test mutating func addHLToHL() async throws {
-        self.cpu.hl = 0x7FFF
-        self.cpu.setProgram(program: [0x29])
-        let oldCPU = self.cpu
-
-        try self.cpu.executeInstruction()
-
-        checkCPU(oldCPU,
-                 extraCycles: 2,
-                 pc: 0x0001,
-                 f: .newValue(RegisterBit.halfCarry.value),
-                 h: .newValue(0xFF),
-                 l: .newValue(0xFE))
+        try await self.testProgram(program: [0x29],
+                                   h: 0x7F,
+                                   l: 0xFF,
+                                   extraCycles: 2,
+                                   newPC: 0x0001,
+                                   newF: .newValue(RegisterBit.halfCarry.value),
+                                   newH: .newValue(0xFF),
+                                   newL: .newValue(0xFE))
     }
 
     @Test mutating func addSPToHL() async throws {
-        self.cpu.sp = 0x0001
-        self.cpu.hl = 0xFFFF
-        self.cpu.setProgram(program: [0x39])
-        let oldCPU = self.cpu
+        try await self.testProgram(program: [0x39],
+                                   sp: 0x0001,
+                                   h: 0xFF,
+                                   l: 0xFF,
+                                   extraCycles: 2,
+                                   newPC: 0x0001,
+                                   newSP: .unchanged,
+                                   newF: .newValue(RegisterBit.halfCarry.value | RegisterBit.carry.value),
+                                   newH: .newValue(0x00),
+                                   newL: .newValue(0x00))
+    }
 
+    mutating func testProgram(program: [UInt8],
+                              pc: UInt16 = 0x0000,
+                              sp: UInt16 = 0x0000,
+                              a: UInt8 = 0x00,
+                              f: UInt8 = 0x00,
+                              b: UInt8 = 0x00,
+                              c: UInt8 = 0x00,
+                              d: UInt8 = 0x00,
+                              e: UInt8 = 0x00,
+                              h: UInt8 = 0x00,
+                              l: UInt8 = 0x00,
+                              extraCycles: Int,
+                              newPC: UInt16,
+                              newSP: RegisterPairChange = .unchanged,
+                              newA: RegisterChange = .unchanged,
+                              newF: RegisterChange = .unchanged,
+                              newB: RegisterChange = .unchanged,
+                              newC: RegisterChange = .unchanged,
+                              newD: RegisterChange = .unchanged,
+                              newE: RegisterChange = .unchanged,
+                              newH: RegisterChange = .unchanged,
+                              newL: RegisterChange = .unchanged,
+                              memoryChanges: [UInt16 : UInt8] = [:]) async throws {
+        self.cpu.program = program
+        self.cpu.pc = pc
+        self.cpu.sp = sp
+        self.cpu.a = a
+        self.cpu.f = f
+        self.cpu.b = b
+        self.cpu.c = c
+        self.cpu.d = d
+        self.cpu.e = e
+        self.cpu.h = h
+        self.cpu.l = l
+
+        let oldCPU = self.cpu
         try self.cpu.executeInstruction()
 
         checkCPU(oldCPU,
-                 extraCycles: 2,
-                 pc: 0x0001,
-                 f: .newValue(RegisterBit.halfCarry.value | RegisterBit.carry.value),
-                 h: .newValue(0x00),
-                 l: .newValue(0x00))
+                 extraCycles: extraCycles,
+                 pc: newPC,
+                 sp: newSP,
+                 a: newA,
+                 f: newF,
+                 b: newB,
+                 c: newC,
+                 d: newD,
+                 e: newE,
+                 h: newH,
+                 l: newL,
+                 memoryChanges: memoryChanges)
     }
 
     func checkCPU(
