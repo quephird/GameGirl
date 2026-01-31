@@ -797,6 +797,462 @@ struct OpcodeTests {
                                    newL: .newValue(0x00))
     }
 
+    @Test mutating func ldBFromB() async throws {
+        try await self.testProgram(program: [0x40],
+                                   b: 0x42,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newB: .unchanged)
+    }
+
+    @Test mutating func ldBFromC() async throws {
+        try await self.testProgram(program: [0x41],
+                                   c: 0x42,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newB: .newValue(0x42),
+                                   newC: .unchanged)
+    }
+
+    @Test mutating func ldBFromD() async throws {
+        try await self.testProgram(program: [0x42],
+                                   d: 0x42,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newB: .newValue(0x42),
+                                   newD: .unchanged)
+    }
+
+    @Test mutating func ldBFromE() async throws {
+        try await self.testProgram(program: [0x43],
+                                   e: 0x42,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newB: .newValue(0x42),
+                                   newE: .unchanged)
+    }
+
+    @Test mutating func ldBFromH() async throws {
+        try await self.testProgram(program: [0x44],
+                                   h: 0x42,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newB: .newValue(0x42),
+                                   newH: .unchanged)
+    }
+
+    @Test mutating func ldBFromL() async throws {
+        try await self.testProgram(program: [0x45],
+                                   l: 0x42,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newB: .newValue(0x42),
+                                   newL: .unchanged)
+    }
+
+    @Test mutating func ldBFromHLIndirect() async throws {
+        try await self.testProgram(program: [0x46, 0x42],
+                                   h: 0x00,
+                                   l: 0x01,
+                                   extraCycles: 2,
+                                   newPC: 0x0001,
+                                   newB: .newValue(0x42),
+                                   newH: .unchanged,
+                                   newL: .unchanged)
+    }
+
+    @Test mutating func ldCFromB() async throws {
+        try await self.testProgram(program: [0x48],
+                                   b: 0x42,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newB: .unchanged,
+                                   newC: .newValue(0x42))
+    }
+
+    @Test mutating func ldCFromC() async throws {
+        try await self.testProgram(program: [0x49],
+                                   c: 0x42,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newC: .unchanged)
+    }
+
+    @Test mutating func ldCFromD() async throws {
+        try await self.testProgram(program: [0x4A],
+                                   d: 0x42,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newC: .newValue(0x42),
+                                   newD: .unchanged)
+    }
+
+    @Test mutating func ldCFromE() async throws {
+        try await self.testProgram(program: [0x4B],
+                                   e: 0x42,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newC: .newValue(0x42),
+                                   newE: .unchanged)
+    }
+
+    @Test mutating func ldCFromH() async throws {
+        try await self.testProgram(program: [0x4C],
+                                   h: 0x42,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newC: .newValue(0x42),
+                                   newH: .unchanged)
+    }
+
+    @Test mutating func ldCFromL() async throws {
+        try await self.testProgram(program: [0x4D],
+                                   l: 0x42,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newC: .newValue(0x42),
+                                   newL: .unchanged)
+    }
+
+    @Test mutating func ldCFromHLIndirect() async throws {
+        try await self.testProgram(program: [0x4E, 0x42],
+                                   h: 0x00,
+                                   l: 0x01,
+                                   extraCycles: 2,
+                                   newPC: 0x0001,
+                                   newC: .newValue(0x42),
+                                   newH: .unchanged,
+                                   newL: .unchanged)
+    }
+
+    @Test mutating func ldDFromB() async throws {
+        try await self.testProgram(program: [0x50],
+                                   b: 0x42,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newB: .unchanged,
+                                   newD: .newValue(0x42))
+    }
+
+    @Test mutating func ldDFromC() async throws {
+        try await self.testProgram(program: [0x51],
+                                   c: 0x42,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newC: .unchanged,
+                                   newD: .newValue(0x42))
+    }
+
+    @Test mutating func ldDFromD() async throws {
+        try await self.testProgram(program: [0x52],
+                                   d: 0x42,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newD: .unchanged)
+    }
+
+    @Test mutating func ldDFromE() async throws {
+        try await self.testProgram(program: [0x53],
+                                   e: 0x42,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newD: .newValue(0x42),
+                                   newE: .unchanged)
+    }
+
+    @Test mutating func ldDFromH() async throws {
+        try await self.testProgram(program: [0x54],
+                                   h: 0x42,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newD: .newValue(0x42),
+                                   newH: .unchanged)
+    }
+
+    @Test mutating func ldDFromL() async throws {
+        try await self.testProgram(program: [0x55],
+                                   l: 0x42,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newD: .newValue(0x42),
+                                   newL: .unchanged)
+    }
+
+    @Test mutating func ldDFromHLIndirect() async throws {
+        try await self.testProgram(program: [0x56, 0x42],
+                                   h: 0x00,
+                                   l: 0x01,
+                                   extraCycles: 2,
+                                   newPC: 0x0001,
+                                   newD: .newValue(0x42),
+                                   newH: .unchanged,
+                                   newL: .unchanged)
+    }
+
+    @Test mutating func ldEFromB() async throws {
+        try await self.testProgram(program: [0x58],
+                                   b: 0x42,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newB: .unchanged,
+                                   newE: .newValue(0x42))
+    }
+
+    @Test mutating func ldEFromC() async throws {
+        try await self.testProgram(program: [0x59],
+                                   c: 0x42,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newC: .unchanged,
+                                   newE: .newValue(0x42))
+    }
+
+    @Test mutating func ldEFromD() async throws {
+        try await self.testProgram(program: [0x5A],
+                                   d: 0x42,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newD: .unchanged,
+                                   newE: .newValue(0x42))
+    }
+
+    @Test mutating func ldEFromE() async throws {
+        try await self.testProgram(program: [0x5B],
+                                   e: 0x42,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newE: .unchanged)
+    }
+
+    @Test mutating func ldEFromH() async throws {
+        try await self.testProgram(program: [0x5C],
+                                   h: 0x42,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newE: .newValue(0x42),
+                                   newH: .unchanged)
+    }
+
+    @Test mutating func ldEFromL() async throws {
+        try await self.testProgram(program: [0x5D],
+                                   l: 0x42,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newE: .newValue(0x42),
+                                   newL: .unchanged)
+    }
+
+    @Test mutating func ldEFromHLIndirect() async throws {
+        try await self.testProgram(program: [0x5E, 0x42],
+                                   h: 0x00,
+                                   l: 0x01,
+                                   extraCycles: 2,
+                                   newPC: 0x0001,
+                                   newE: .newValue(0x42),
+                                   newH: .unchanged,
+                                   newL: .unchanged)
+    }
+
+    @Test mutating func ldHFromB() async throws {
+        try await self.testProgram(program: [0x60],
+                                   b: 0x42,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newB: .unchanged,
+                                   newH: .newValue(0x42))
+    }
+
+    @Test mutating func ldHFromC() async throws {
+        try await self.testProgram(program: [0x61],
+                                   c: 0x42,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newC: .unchanged,
+                                   newH: .newValue(0x42))
+    }
+
+    @Test mutating func ldHFromD() async throws {
+        try await self.testProgram(program: [0x62],
+                                   d: 0x42,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newD: .unchanged,
+                                   newH: .newValue(0x42))
+    }
+
+    @Test mutating func ldHFromE() async throws {
+        try await self.testProgram(program: [0x63],
+                                   e: 0x42,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newE: .unchanged,
+                                   newH: .newValue(0x42))
+    }
+
+    @Test mutating func ldHFromH() async throws {
+        try await self.testProgram(program: [0x64],
+                                   h: 0x42,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newH: .unchanged)
+    }
+
+    @Test mutating func ldHFromL() async throws {
+        try await self.testProgram(program: [0x65],
+                                   l: 0x42,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newH: .newValue(0x42),
+                                   newL: .unchanged)
+    }
+
+    @Test mutating func ldHFromHLIndirect() async throws {
+        try await self.testProgram(program: [0x66, 0x42],
+                                   h: 0x00,
+                                   l: 0x01,
+                                   extraCycles: 2,
+                                   newPC: 0x0001,
+                                   newH: .newValue(0x42),
+                                   newL: .unchanged)
+    }
+
+    @Test mutating func ldLFromB() async throws {
+        try await self.testProgram(program: [0x68],
+                                   b: 0x42,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newB: .unchanged,
+                                   newL: .newValue(0x42))
+    }
+
+    @Test mutating func ldLFromC() async throws {
+        try await self.testProgram(program: [0x69],
+                                   c: 0x42,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newC: .unchanged,
+                                   newL: .newValue(0x42))
+    }
+
+    @Test mutating func ldLFromD() async throws {
+        try await self.testProgram(program: [0x6A],
+                                   d: 0x42,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newD: .unchanged,
+                                   newL: .newValue(0x42))
+    }
+
+    @Test mutating func ldLFromE() async throws {
+        try await self.testProgram(program: [0x6B],
+                                   e: 0x42,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newE: .unchanged,
+                                   newL: .newValue(0x42))
+    }
+
+    @Test mutating func ldLFromH() async throws {
+        try await self.testProgram(program: [0x6C],
+                                   h: 0x42,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newH: .unchanged,
+                                   newL: .newValue(0x42))
+    }
+
+    @Test mutating func ldLFromL() async throws {
+        try await self.testProgram(program: [0x6D],
+                                   l: 0x42,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newL: .unchanged)
+    }
+
+    @Test mutating func ldLFromHLIndirect() async throws {
+        try await self.testProgram(program: [0x6E, 0x42],
+                                   h: 0x00,
+                                   l: 0x01,
+                                   extraCycles: 2,
+                                   newPC: 0x0001,
+                                   newH: .unchanged,
+                                   newL: .newValue(0x42))
+    }
+
+    @Test mutating func ldHLIndirectFromB() async throws {
+        try await self.testProgram(program: [0x70, 0x00],
+                                   b: 0x42,
+                                   h: 0x00,
+                                   l: 0x01,
+                                   extraCycles: 2,
+                                   newPC: 0x0001,
+                                   newB: .unchanged,
+                                   newH: .unchanged,
+                                   newL: .unchanged,
+                                   memoryChanges: [0x0001: 0x42])
+    }
+
+    @Test mutating func ldHLIndirectFromC() async throws {
+        try await self.testProgram(program: [0x71, 0x00],
+                                   c: 0x42,
+                                   h: 0x00,
+                                   l: 0x01,
+                                   extraCycles: 2,
+                                   newPC: 0x0001,
+                                   newC: .unchanged,
+                                   newH: .unchanged,
+                                   newL: .unchanged,
+                                   memoryChanges: [0x0001: 0x42])
+    }
+
+    @Test mutating func ldHLIndirectFromD() async throws {
+        try await self.testProgram(program: [0x72, 0x00],
+                                   d: 0x42,
+                                   h: 0x00,
+                                   l: 0x01,
+                                   extraCycles: 2,
+                                   newPC: 0x0001,
+                                   newD: .unchanged,
+                                   newH: .unchanged,
+                                   newL: .unchanged,
+                                   memoryChanges: [0x0001: 0x42])
+    }
+
+    @Test mutating func ldHLIndirectFromE() async throws {
+        try await self.testProgram(program: [0x73, 0x00],
+                                   e: 0x42,
+                                   h: 0x00,
+                                   l: 0x01,
+                                   extraCycles: 2,
+                                   newPC: 0x0001,
+                                   newE: .unchanged,
+                                   newH: .unchanged,
+                                   newL: .unchanged,
+                                   memoryChanges: [0x0001: 0x42])
+    }
+
+    @Test mutating func ldHLIndirectFromH() async throws {
+        try await self.testProgram(program: [0x74, 0x42],
+                                   h: 0x00,
+                                   l: 0x01,
+                                   extraCycles: 2,
+                                   newPC: 0x0001,
+                                   newH: .unchanged,
+                                   newL: .unchanged,
+                                   memoryChanges: [0x0001: 0x00])
+    }
+
+    @Test mutating func ldHLIndirectFromL() async throws {
+        try await self.testProgram(program: [0x75, 0x42],
+                                   h: 0x00,
+                                   l: 0x01,
+                                   extraCycles: 2,
+                                   newPC: 0x0001,
+                                   newH: .unchanged,
+                                   newL: .unchanged,
+                                   memoryChanges: [0x0001: 0x01])
+    }
+
     mutating func testProgram(program: [UInt8],
                               pc: UInt16 = 0x0000,
                               sp: UInt16 = 0x0000,

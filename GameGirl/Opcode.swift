@@ -64,6 +64,54 @@ enum Opcode: UInt8 {
     case decA = 0x3D
     case ldAFromImmediate = 0x3E
     case ccf = 0x3F
+    case ldBFromB = 0x40
+    case ldBFromC = 0x41
+    case ldBFromD = 0x42
+    case ldBFromE = 0x43
+    case ldBFromH = 0x44
+    case ldBFromL = 0x45
+    case ldBFromHLIndirect = 0x46
+    case ldCFromB = 0x48
+    case ldCFromC = 0x49
+    case ldCFromD = 0x4A
+    case ldCFromE = 0x4B
+    case ldCFromH = 0x4C
+    case ldCFromL = 0x4D
+    case ldCFromHLIndirect = 0x4E
+    case ldDFromB = 0x50
+    case ldDFromC = 0x51
+    case ldDFromD = 0x52
+    case ldDFromE = 0x53
+    case ldDFromH = 0x54
+    case ldDFromL = 0x55
+    case ldDFromHLIndirect = 0x56
+    case ldEFromB = 0x58
+    case ldEFromC = 0x59
+    case ldEFromD = 0x5A
+    case ldEFromE = 0x5B
+    case ldEFromH = 0x5C
+    case ldEFromL = 0x5D
+    case ldEFromHLIndirect = 0x5E
+    case ldHFromB = 0x60
+    case ldHFromC = 0x61
+    case ldHFromD = 0x62
+    case ldHFromE = 0x63
+    case ldHFromH = 0x64
+    case ldHFromL = 0x65
+    case ldHFromHLIndirect = 0x66
+    case ldLFromB = 0x68
+    case ldLFromC = 0x69
+    case ldLFromD = 0x6A
+    case ldLFromE = 0x6B
+    case ldLFromH = 0x6C
+    case ldLFromL = 0x6D
+    case ldLFromHLIndirect = 0x6E
+    case ldHLIndirectFromB = 0x70
+    case ldHLIndirectFromC = 0x71
+    case ldHLIndirectFromD = 0x72
+    case ldHLIndirectFromE = 0x73
+    case ldHLIndirectFromH = 0x74
+    case ldHLIndirectFromL = 0x75
 }
 
 extension Opcode {
@@ -77,8 +125,13 @@ extension Opcode {
         case hlIndirect = 0b110
         case a = 0b111
 
-        init?(opcode: Opcode) {
+        init?(atBit3Of opcode: Opcode) {
             let rawValue = (opcode.rawValue & 0b0011_1000) >> 3
+            self.init(rawValue: rawValue)
+        }
+
+        init?(atBit0Of opcode: Opcode) {
+            let rawValue = opcode.rawValue & 0b0000_0111
             self.init(rawValue: rawValue)
         }
     }
@@ -124,6 +177,14 @@ extension Opcode {
         case .addBCToHL, .addDEToHL, .addHLToHL, .addSPToHL: 1
         case .ldAFromBCIndirect, .ldAFromDEIndirect, .ldAFromHLIndirectAndIncrement, .ldAFromHLIndirectAndDecrement: 1
         case .decBC, .decDE, .decHL, .decSP: 1
+        case .ldBFromB, .ldBFromC, .ldBFromD, .ldBFromE, .ldBFromH, .ldBFromL, .ldBFromHLIndirect,
+                .ldCFromB, .ldCFromC, .ldCFromD, .ldCFromE, .ldCFromH, .ldCFromL, .ldCFromHLIndirect,
+                .ldDFromB, .ldDFromC, .ldDFromD, .ldDFromE, .ldDFromH, .ldDFromL, .ldDFromHLIndirect,
+                .ldEFromB, .ldEFromC, .ldEFromD, .ldEFromE, .ldEFromH, .ldEFromL, .ldEFromHLIndirect,
+                .ldHFromB, .ldHFromC, .ldHFromD, .ldHFromE, .ldHFromH, .ldHFromL, .ldHFromHLIndirect,
+                .ldLFromB, .ldLFromC, .ldLFromD, .ldLFromE, .ldLFromH, .ldLFromL, .ldLFromHLIndirect,
+                .ldHLIndirectFromB, .ldHLIndirectFromC, .ldHLIndirectFromD,
+                .ldHLIndirectFromE, .ldHLIndirectFromH, .ldHLIndirectFromL: 1
         }
     }
 }
@@ -146,6 +207,16 @@ extension Opcode {
         case .addBCToHL, .addDEToHL, .addHLToHL, .addSPToHL: 2
         case .ldAFromBCIndirect, .ldAFromDEIndirect, .ldAFromHLIndirectAndIncrement, .ldAFromHLIndirectAndDecrement: 2
         case .decBC, .decDE, .decHL, .decSP: 2
+        case .ldBFromB, .ldBFromC, .ldBFromD, .ldBFromE, .ldBFromH, .ldBFromL,
+                .ldCFromB, .ldCFromC, .ldCFromD, .ldCFromE, .ldCFromH, .ldCFromL,
+                .ldDFromB, .ldDFromC, .ldDFromD, .ldDFromE, .ldDFromH, .ldDFromL,
+                .ldEFromB, .ldEFromC, .ldEFromD, .ldEFromE, .ldEFromH, .ldEFromL,
+                .ldHFromB, .ldHFromC, .ldHFromD, .ldHFromE, .ldHFromH, .ldHFromL,
+                .ldLFromB, .ldLFromC, .ldLFromD, .ldLFromE, .ldLFromH, .ldLFromL: 1
+        case .ldBFromHLIndirect, .ldCFromHLIndirect, .ldDFromHLIndirect,
+                .ldEFromHLIndirect, .ldHFromHLIndirect, .ldLFromHLIndirect: 2
+        case .ldHLIndirectFromB, .ldHLIndirectFromC, .ldHLIndirectFromD,
+                .ldHLIndirectFromE, .ldHLIndirectFromH, .ldHLIndirectFromL: 2
         }
     }
 }

@@ -70,6 +70,35 @@ extension CPU {
 }
 
 extension CPU {
+    subscript(_ index: Opcode.Register8Target) -> UInt8 {
+        mutating get {
+            switch index {
+            case .b: return self.b
+            case .c: return self.c
+            case .d: return self.d
+            case .e: return self.e
+            case .h: return self.h
+            case .l: return self.l
+            case .hlIndirect: return self.readMemory(address: self.hl)
+            case .a: return self.a
+            }
+        }
+        set {
+            switch index {
+            case .b: self.b = newValue
+            case .c: self.c = newValue
+            case .d: self.d = newValue
+            case .e: self.e = newValue
+            case .h: self.h = newValue
+            case .l: self.l = newValue
+            case .hlIndirect: self.writeMemory(address: self.hl, byte: newValue)
+            case .a: self.a = newValue
+            }
+        }
+    }
+}
+
+extension CPU {
     mutating func readProgramByte() -> UInt8 {
         // NOTA BENE: Perhaps later we can do some bounds checking
         let byte = self.readMemory(address: self.pc)
@@ -105,7 +134,7 @@ extension CPU {
         }
     }
 
-    mutating func execute(opcode: Opcode) {
+    mutating func execute(opcode: Opcode) throws {
         switch opcode {
         case .nop:
             self.nop()
@@ -116,11 +145,11 @@ extension CPU {
         case .incBC, .incDE, .incHL, .incSP:
             self.incrementRegister(target: Opcode.Register16Target(opcode: opcode)!)
         case .incB, .incC, .incD, .incE, .incH, .incL, .incHLIndirect, .incA:
-            self.incrementRegister(target: Opcode.Register8Target(opcode: opcode)!)
+            self.incrementRegister(target: Opcode.Register8Target(atBit3Of: opcode)!)
         case .decB, .decC, .decD, .decE, .decH, .decL, .decHLIndirect, .decA:
-            self.decrementRegister(target: Opcode.Register8Target(opcode: opcode)!)
+            self.decrementRegister(target: Opcode.Register8Target(atBit3Of: opcode)!)
         case .ldBFromImmediate, .ldCFromImmediate, .ldDFromImmediate, .ldEFromImmediate, .ldHFromImmediate, .ldLFromImmediate, .ldHLIndirectFromImmediate, .ldAFromImmediate:
-            self.load(target: Opcode.Register8Target(opcode: opcode)!)
+            self.load(target: Opcode.Register8Target(atBit3Of: opcode)!)
         case .rlca:
             self.rlca()
         case .rrca:
@@ -145,13 +174,23 @@ extension CPU {
             self.loadAFromMemory(target: Opcode.IndirectMemoryTarget(opcode: opcode)!)
         case .decBC, .decDE, .decHL, .decSP:
             self.decrementRegister(target: Opcode.Register16Target(opcode: opcode)!)
+        case .ldBFromB, .ldBFromC, .ldBFromD, .ldBFromE, .ldBFromH, .ldBFromL, .ldBFromHLIndirect,
+                .ldCFromB, .ldCFromC, .ldCFromD, .ldCFromE, .ldCFromH, .ldCFromL, .ldCFromHLIndirect,
+                .ldDFromB, .ldDFromC, .ldDFromD, .ldDFromE, .ldDFromH, .ldDFromL, .ldDFromHLIndirect,
+                .ldEFromB, .ldEFromC, .ldEFromD, .ldEFromE, .ldEFromH, .ldEFromL, .ldEFromHLIndirect,
+                .ldHFromB, .ldHFromC, .ldHFromD, .ldHFromE, .ldHFromH, .ldHFromL, .ldHFromHLIndirect,
+                .ldLFromB, .ldLFromC, .ldLFromD, .ldLFromE, .ldLFromH, .ldLFromL, .ldLFromHLIndirect,
+                .ldHLIndirectFromB, .ldHLIndirectFromC, .ldHLIndirectFromD,
+                .ldHLIndirectFromE, .ldHLIndirectFromH, .ldHLIndirectFromL:
+            try self.load(from: Opcode.Register8Target(atBit0Of: opcode)!,
+                          to: Opcode.Register8Target(atBit3Of: opcode)!)
         }
     }
 
     public mutating func executeInstruction() throws {
         let oldCycles = self.cycles
         let opcode = try self.fetchOpcode()
-        self.execute(opcode: opcode)
+        try self.execute(opcode: opcode)
         assert(self.cycles - oldCycles == opcode.cycles, "The cycle count for this instruction is off: \(opcode)")
     }
 
@@ -424,5 +463,9 @@ extension CPU {
 
         // NOTA BENE: This set of instructions incurs an extra cycle
         self.cycles += 1
+    }
+
+    mutating func load(from: Opcode.Register8Target, to: Opcode.Register8Target) throws {
+        self[to] = self[from]
     }
 }
