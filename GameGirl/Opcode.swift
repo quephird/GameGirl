@@ -112,6 +112,22 @@ enum Opcode: UInt8 {
     case ldHLIndirectFromE = 0x73
     case ldHLIndirectFromH = 0x74
     case ldHLIndirectFromL = 0x75
+    case addBToA = 0x80
+    case addCToA = 0x81
+    case addDToA = 0x82
+    case addEToA = 0x83
+    case addHToA = 0x84
+    case addLToA = 0x85
+    case addHLIndirectToA = 0x86
+    case addAToA = 0x87
+    case adcBToA = 0x88
+    case adcCToA = 0x89
+    case adcDToA = 0x8A
+    case adcEToA = 0x8B
+    case adcHToA = 0x8C
+    case adcLToA = 0x8D
+    case adcHLIndirectToA = 0x8E
+    case adcAToA = 0x8F
 }
 
 extension Opcode {
@@ -185,6 +201,8 @@ extension Opcode {
                 .ldLFromB, .ldLFromC, .ldLFromD, .ldLFromE, .ldLFromH, .ldLFromL, .ldLFromHLIndirect,
                 .ldHLIndirectFromB, .ldHLIndirectFromC, .ldHLIndirectFromD,
                 .ldHLIndirectFromE, .ldHLIndirectFromH, .ldHLIndirectFromL: 1
+        case .addBToA, .addCToA, .addDToA, .addEToA, .addHToA, .addLToA, .addHLIndirectToA, .addAToA: 1
+        case .adcBToA, .adcCToA, .adcDToA, .adcEToA, .adcHToA, .adcLToA, .adcHLIndirectToA, .adcAToA: 1
         }
     }
 }
@@ -217,6 +235,10 @@ extension Opcode {
                 .ldEFromHLIndirect, .ldHFromHLIndirect, .ldLFromHLIndirect: 2
         case .ldHLIndirectFromB, .ldHLIndirectFromC, .ldHLIndirectFromD,
                 .ldHLIndirectFromE, .ldHLIndirectFromH, .ldHLIndirectFromL: 2
+        case .addBToA, .addCToA, .addDToA, .addEToA, .addHToA, .addLToA, .addAToA: 1
+        case .addHLIndirectToA: 2
+        case .adcBToA, .adcCToA, .adcDToA, .adcEToA, .adcHToA, .adcLToA, .adcAToA: 1
+        case .adcHLIndirectToA: 2
         }
     }
 }

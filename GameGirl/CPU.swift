@@ -184,6 +184,10 @@ extension CPU {
                 .ldHLIndirectFromE, .ldHLIndirectFromH, .ldHLIndirectFromL:
             try self.load(from: Opcode.Register8Target(atBit0Of: opcode)!,
                           to: Opcode.Register8Target(atBit3Of: opcode)!)
+        case .addBToA, .addCToA, .addDToA, .addEToA, .addHToA, .addLToA, .addHLIndirectToA, .addAToA:
+            self.addToA(from: Opcode.Register8Target(atBit0Of: opcode)!)
+        case .adcBToA, .adcCToA, .adcDToA, .adcEToA, .adcHToA, .adcLToA, .adcHLIndirectToA, .adcAToA:
+            self.adcToA(from: Opcode.Register8Target(atBit0Of: opcode)!)
         }
     }
 
@@ -364,35 +368,15 @@ extension CPU {
     }
 
     mutating func incrementRegister(target: Opcode.Register8Target) {
-        switch target {
-        case .b:
-            self.incrementRegister8Impl(register: &self.b, flags: &self.f)
-        case .c:
-            self.incrementRegister8Impl(register: &self.c, flags: &self.f)
-        case .d:
-            self.incrementRegister8Impl(register: &self.d, flags: &self.f)
-        case .e:
-            self.incrementRegister8Impl(register: &self.e, flags: &self.f)
-        case .h:
-            self.incrementRegister8Impl(register: &self.h, flags: &self.f)
-        case .l:
-            self.incrementRegister8Impl(register: &self.l, flags: &self.f)
-        case .hlIndirect:
-            var newValue = self.readMemory(address: self.hl)
-            self.incrementRegister8Impl(register: &newValue, flags: &self.f)
-            self.writeMemory(address: self.hl, byte: newValue)
-        case .a:
-            self.incrementRegister8Impl(register: &self.a, flags: &self.f)
-        }
-    }
+        let oldRegister = self[target]
 
-    func incrementRegister8Impl(register: inout Register8, flags: inout Register8) {
-        let oldRegister = register
+        let newRegister: Register8
+        (newRegister, self.f[.carry]) = oldRegister.addingReportingOverflow(1)
+        (_, self.f[.halfCarry]) = (oldRegister << 4).addingReportingOverflow(1 << 4)
+        self.f[.zero] = newRegister == 0
+        self.f[.subtraction] = false
+        self[target] = newRegister
 
-        (register, flags[.carry]) = register.addingReportingOverflow(1)
-        (_, flags[.halfCarry]) = (oldRegister << 4).addingReportingOverflow(1 << 4)
-        flags[.zero] = register == 0
-        flags[.subtraction] = false
     }
 
     mutating func decrementRegister(target: Opcode.Register16Target) {
@@ -412,37 +396,15 @@ extension CPU {
     }
 
     mutating func decrementRegister(target: Opcode.Register8Target) {
-        switch target {
-        case .b:
-            self.decrementRegister8Impl(register: &self.b, flags: &self.f)
-        case .c:
-            self.decrementRegister8Impl(register: &self.c, flags: &self.f)
-        case .d:
-            self.decrementRegister8Impl(register: &self.d, flags: &self.f)
-        case .e:
-            self.decrementRegister8Impl(register: &self.e, flags: &self.f)
-        case .h:
-            self.decrementRegister8Impl(register: &self.h, flags: &self.f)
-        case .l:
-            self.decrementRegister8Impl(register: &self.l, flags: &self.f)
-        case .hlIndirect:
-            var newValue = self.readMemory(address: self.hl)
-            self.decrementRegister8Impl(register: &newValue, flags: &self.f)
-            self.writeMemory(address: self.hl, byte: newValue)
-        case .a:
-            self.decrementRegister8Impl(register: &self.a, flags: &self.f)
-        }
-    }
+        let oldRegister = self[target]
 
-    func decrementRegister8Impl(register: inout Register8, flags: inout Register8) {
-        let oldRegister = register
-
-        register &-= 1
+        let newRegister = oldRegister &- 1
         // NOTA BENE: Per the GameBoy technical manual, we need to set the half carry
         // flag if there was _not_ a borrow.
-        flags[.halfCarry] = (((oldRegister & 0x0F) &- 0x01) & 0x10) != 0x10
-        flags[.zero] = register == 0
-        flags[.subtraction] = true
+        self.f[.halfCarry] = (((oldRegister & 0x0F) &- 0x01) & 0x10) != 0x10
+        self.f[.zero] = newRegister == 0
+        self.f[.subtraction] = true
+        self[target] = newRegister
     }
 
     mutating func addToHL(from: Opcode.Register16Target) {
@@ -467,5 +429,36 @@ extension CPU {
 
     mutating func load(from: Opcode.Register8Target, to: Opcode.Register8Target) throws {
         self[to] = self[from]
+    }
+
+    mutating func addToA(from: Opcode.Register8Target) {
+        let oldA = self.a
+        // NOTA BENE: We cache the value here once to avoid incurring extra cycles
+        // for when we read from actual memory
+        let fromValue = self[from]
+
+        let newA: Register8
+        (newA, self.f[.carry]) = self.a.addingReportingOverflow(fromValue)
+        (_, self.f[.halfCarry]) = (oldA << 4).addingReportingOverflow(fromValue << 4)
+        self.f[.zero] = newA == 0
+        self.f[.subtraction] = false
+        self.a = newA
+    }
+
+    // TODO: THink about a helper overload for addingReportingOverflow() that takes two args
+
+    mutating func adcToA(from: Opcode.Register8Target) {
+        let oldA = self.a
+        let oldCarry = self.f[.carry]
+        // NOTA BENE: We cache the value here once to avoid incurring extra cycles
+        // for when we read from actual memory
+        let fromValue = self[from]
+
+        let newA: Register8
+        (newA, self.f[.carry]) = self.a.addingReportingOverflow(fromValue, carryValue: oldCarry.intValue)
+        (_, self.f[.halfCarry]) = (oldA << 4).addingReportingOverflow(fromValue << 4, carryValue: oldCarry.intValue << 4)
+        self.f[.zero] = newA == 0
+        self.f[.subtraction] = false
+        self.a = newA
     }
 }

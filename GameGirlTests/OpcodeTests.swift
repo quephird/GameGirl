@@ -1253,6 +1253,198 @@ struct OpcodeTests {
                                    memoryChanges: [0x0001: 0x01])
     }
 
+    @Test mutating func addBToA() async throws {
+        try await self.testProgram(program: [0x80],
+                                   a: 0x21,
+                                   f: 0x00,
+                                   b: 0x21,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newA: .newValue(0x42),
+                                   newF: .unchanged,
+                                   newB: .unchanged)
+    }
+
+    @Test mutating func addCToA() async throws {
+        try await self.testProgram(program: [0x81],
+                                   a: 0x21,
+                                   f: 0x10,
+                                   c: 0x21,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newA: .newValue(0x42),
+                                   newF: .newValue(0x00),
+                                   newC: .unchanged)
+    }
+
+    @Test mutating func addDToA() async throws {
+        try await self.testProgram(program: [0x82],
+                                   a: 0x00,
+                                   f: 0x00,
+                                   d: 0x00,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newA: .newValue(0x00),
+                                   newF: .newValue(RegisterBit.zero.value),
+                                   newD: .unchanged)
+    }
+
+    @Test mutating func addEToA() async throws {
+        try await self.testProgram(program: [0x83],
+                                   a: 0x0F,
+                                   f: 0x00,
+                                   e: 0x01,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newA: .newValue(0x10),
+                                   newF: .newValue(RegisterBit.halfCarry.value),
+                                   newE: .unchanged)
+    }
+
+    @Test mutating func addHToA() async throws {
+        try await self.testProgram(program: [0x84],
+                                   a: 0xF9,
+                                   f: 0x00,
+                                   h: 0x08,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newA: .newValue(0x01),
+                                   newF: .newValue(RegisterBit.halfCarry.value | RegisterBit.carry.value),
+                                   newH: .unchanged)
+    }
+
+    @Test mutating func addLToA() async throws {
+        try await self.testProgram(program: [0x85],
+                                   a: 0xFF,
+                                   f: 0x00,
+                                   l: 0x01,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newA: .newValue(0x00),
+                                   newF: .newValue(RegisterBit.zero.value | RegisterBit.halfCarry.value | RegisterBit.carry.value),
+                                   newL: .unchanged)
+    }
+
+    @Test mutating func addHLIndirectToA() async throws {
+        try await self.testProgram(program: [0x86, 0x10],
+                                   a: 0xF1,
+                                   f: 0x00,
+                                   h: 0x00,
+                                   l: 0x01,
+                                   extraCycles: 2,
+                                   newPC: 0x0001,
+                                   newA: .newValue(0x01),
+                                   newF: .newValue(RegisterBit.carry.value),
+                                   newH: .unchanged,
+                                   newL: .unchanged)
+    }
+
+    @Test mutating func addAToA() async throws {
+        try await self.testProgram(program: [0x87],
+                                   a: 0x21,
+                                   f: 0x00,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newA: .newValue(0x42),
+                                   newF: .unchanged)
+   }
+
+    @Test mutating func adcBToA() async throws {
+        try await self.testProgram(program: [0x88],
+                                   a: 0x21,
+                                   f: 0x00,
+                                   b: 0x21,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newA: .newValue(0x42),
+                                   newF: .unchanged,
+                                   newB: .unchanged)
+    }
+
+    @Test mutating func adcCToA() async throws {
+        try await self.testProgram(program: [0x89],
+                                   a: 0x00,
+                                   f: 0x00,
+                                   c: 0x00,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newA: .unchanged,
+                                   newF: .newValue(RegisterBit.zero.value),
+                                   newC: .unchanged)
+    }
+
+    @Test mutating func adcDToA() async throws {
+        try await self.testProgram(program: [0x8A],
+                                   a: 0x00,
+                                   f: 0x10,
+                                   d: 0x00,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newA: .newValue(0x01),
+                                   newF: .newValue(0x00),
+                                   newC: .unchanged)
+    }
+
+    @Test mutating func adcEToA() async throws {
+        try await self.testProgram(program: [0x8B],
+                                   a: 0x0E,
+                                   f: 0x10,
+                                   e: 0x01,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newA: .newValue(0x10),
+                                   newF: .newValue(RegisterBit.halfCarry.value),
+                                   newE: .unchanged)
+    }
+
+    @Test mutating func adcHToA() async throws {
+        try await self.testProgram(program: [0x8C],
+                                   a: 0xF0,
+                                   f: 0x10,
+                                   h: 0x10,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newA: .newValue(0x01),
+                                   newF: .newValue(RegisterBit.carry.value),
+                                   newH: .unchanged)
+    }
+
+    @Test mutating func adcLToA() async throws {
+        try await self.testProgram(program: [0x8D],
+                                   a: 0xFF,
+                                   f: 0x10,
+                                   l: 0xFF,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newA: .newValue(0xFF),
+                                   newF: .newValue(RegisterBit.carry.value | RegisterBit.halfCarry.value),
+                                   newL: .unchanged)
+    }
+
+    @Test mutating func adcHLIndirectToA() async throws {
+        try await self.testProgram(program: [0x8E, 0x01],
+                                   a: 0xFE,
+                                   f: 0x10,
+                                   h: 0x00,
+                                   l: 0x01,
+                                   extraCycles: 2,
+                                   newPC: 0x0001,
+                                   newA: .newValue(0x00),
+                                   newF: .newValue(RegisterBit.zero.value | RegisterBit.carry.value | RegisterBit.halfCarry.value),
+                                   newH: .unchanged,
+                                   newL: .unchanged)
+    }
+
+    @Test mutating func adcAToA() async throws {
+        try await self.testProgram(program: [0x8F],
+                                   a: 0x21,
+                                   f: 0x00,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newA: .newValue(0x42),
+                                   newF: .unchanged)
+    }
+
     mutating func testProgram(program: [UInt8],
                               pc: UInt16 = 0x0000,
                               sp: UInt16 = 0x0000,
