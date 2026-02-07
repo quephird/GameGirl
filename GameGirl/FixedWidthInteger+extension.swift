@@ -6,10 +6,13 @@
 //
 
 extension FixedWidthInteger {
-    func addingReportingOverflow(_ rhs: Self, carryValue: Self) -> (partialValue: Self, overflow: Bool) {
+    func addingReportingCarries(_ rhs: Self, carry: Bool = false) -> (sum: Self, carry: Bool, halfCarry: Bool) {
         let (tempResult, tempCarry) = self.addingReportingOverflow(rhs)
-        let (tempResult2, tempCarry2) = tempResult.addingReportingOverflow(carryValue)
+        let (tempResult2, tempCarry2) = tempResult.addingReportingOverflow(Self(carry.intValue))
 
-        return (tempResult2, tempCarry2 || tempCarry)
+        let (tempResult3, tempHalfCarry) = (self << 4).addingReportingOverflow(rhs << 4)
+        let (_, tempHalfCarry2) = (tempResult3).addingReportingOverflow(Self(carry.intValue << 4))
+
+        return (tempResult2, tempCarry2 || tempCarry, tempHalfCarry || tempHalfCarry2)
     }
 }

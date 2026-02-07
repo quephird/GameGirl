@@ -371,8 +371,7 @@ extension CPU {
         let oldRegister = self[target]
 
         let newRegister: Register8
-        (newRegister, self.f[.carry]) = oldRegister.addingReportingOverflow(1)
-        (_, self.f[.halfCarry]) = (oldRegister << 4).addingReportingOverflow(1 << 4)
+        (newRegister, self.f[.carry], self.f[.halfCarry]) = oldRegister.addingReportingCarries(1)
         self.f[.zero] = newRegister == 0
         self.f[.subtraction] = false
         self[target] = newRegister
@@ -432,33 +431,24 @@ extension CPU {
     }
 
     mutating func addToA(from: Opcode.Register8Target) {
-        let oldA = self.a
         // NOTA BENE: We cache the value here once to avoid incurring extra cycles
         // for when we read from actual memory
         let fromValue = self[from]
 
-        let newA: Register8
-        (newA, self.f[.carry]) = self.a.addingReportingOverflow(fromValue)
-        (_, self.f[.halfCarry]) = (oldA << 4).addingReportingOverflow(fromValue << 4)
-        self.f[.zero] = newA == 0
+        (self.a, self.f[.carry], self.f[.halfCarry]) = self.a.addingReportingCarries(fromValue)
+        self.f[.zero] = self.a == 0
         self.f[.subtraction] = false
-        self.a = newA
     }
 
     // TODO: THink about a helper overload for addingReportingOverflow() that takes two args
 
     mutating func adcToA(from: Opcode.Register8Target) {
-        let oldA = self.a
-        let oldCarry = self.f[.carry]
         // NOTA BENE: We cache the value here once to avoid incurring extra cycles
         // for when we read from actual memory
         let fromValue = self[from]
 
-        let newA: Register8
-        (newA, self.f[.carry]) = self.a.addingReportingOverflow(fromValue, carryValue: oldCarry.intValue)
-        (_, self.f[.halfCarry]) = (oldA << 4).addingReportingOverflow(fromValue << 4, carryValue: oldCarry.intValue << 4)
-        self.f[.zero] = newA == 0
+        (self.a, self.f[.carry], self.f[.halfCarry]) = self.a.addingReportingCarries(fromValue, carry: self.f[.carry])
+        self.f[.zero] = self.a == 0
         self.f[.subtraction] = false
-        self.a = newA
     }
 }
