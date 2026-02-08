@@ -128,6 +128,22 @@ enum Opcode: UInt8 {
     case adcLToA = 0x8D
     case adcHLIndirectToA = 0x8E
     case adcAToA = 0x8F
+    case subBFromA = 0x90
+    case subCFromA = 0x91
+    case subDFromA = 0x92
+    case subEFromA = 0x93
+    case subHFromA = 0x94
+    case subLFromA = 0x95
+    case subHLIndirectFromA = 0x96
+    case subAFromA = 0x97
+    case sbcBFromA = 0x98
+    case sbcCFromA = 0x99
+    case sbcDFromA = 0x9A
+    case sbcEFromA = 0x9B
+    case sbcHFromA = 0x9C
+    case sbcLFromA = 0x9D
+    case sbcHLIndirectFromA = 0x9E
+    case sbcAFromA = 0x9F
 }
 
 extension Opcode {
@@ -203,6 +219,8 @@ extension Opcode {
                 .ldHLIndirectFromE, .ldHLIndirectFromH, .ldHLIndirectFromL: 1
         case .addBToA, .addCToA, .addDToA, .addEToA, .addHToA, .addLToA, .addHLIndirectToA, .addAToA: 1
         case .adcBToA, .adcCToA, .adcDToA, .adcEToA, .adcHToA, .adcLToA, .adcHLIndirectToA, .adcAToA: 1
+        case .subBFromA, .subCFromA, .subDFromA, .subEFromA, .subHFromA, .subLFromA, .subHLIndirectFromA, .subAFromA: 1
+        case .sbcBFromA, .sbcCFromA, .sbcDFromA, .sbcEFromA, .sbcHFromA, .sbcLFromA, .sbcHLIndirectFromA, .sbcAFromA: 1
         }
     }
 }
@@ -239,6 +257,10 @@ extension Opcode {
         case .addHLIndirectToA: 2
         case .adcBToA, .adcCToA, .adcDToA, .adcEToA, .adcHToA, .adcLToA, .adcAToA: 1
         case .adcHLIndirectToA: 2
+        case .subBFromA, .subCFromA, .subDFromA, .subEFromA, .subHFromA, .subLFromA, .subAFromA: 1
+        case .subHLIndirectFromA: 2
+        case .sbcBFromA, .sbcCFromA, .sbcDFromA, .sbcEFromA, .sbcHFromA, .sbcLFromA, .sbcAFromA: 1
+        case .sbcHLIndirectFromA: 2
         }
     }
 }

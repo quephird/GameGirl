@@ -673,11 +673,11 @@ struct OpcodeTests {
 
     @Test mutating func decB() async throws {
         try await self.testProgram(program: [0x05],
-                                   b: 0x0F,
+                                   b: 0x00,
                                    extraCycles: 1,
                                    newPC: 0x0001,
-                                   newF: .newValue(RegisterBit.subtraction.value | RegisterBit.halfCarry.value),
-                                   newB: .newValue(0x0E))
+                                   newF: .newValue(RegisterBit.subtraction.value),
+                                   newB: .newValue(0xFF))
     }
 
     @Test mutating func decC() async throws {
@@ -685,7 +685,7 @@ struct OpcodeTests {
                                    c: 0x10,
                                    extraCycles: 1,
                                    newPC: 0x0001,
-                                   newF: .newValue(RegisterBit.subtraction.value),
+                                   newF: .newValue(RegisterBit.subtraction.value | RegisterBit.carry.value),
                                    newC: .newValue(0x0F))
     }
 
@@ -694,17 +694,17 @@ struct OpcodeTests {
                                    d: 0x01,
                                    extraCycles: 1,
                                    newPC: 0x0001,
-                                   newF: .newValue(RegisterBit.subtraction.value | RegisterBit.halfCarry.value | RegisterBit.zero.value),
+                                   newF: .newValue(RegisterBit.subtraction.value | RegisterBit.halfCarry.value | RegisterBit.carry.value | RegisterBit.zero.value),
                                    newD: .newValue(0x00))
     }
 
     @Test mutating func decE() async throws {
         try await self.testProgram(program: [0x1D],
-                                   e: 0x43,
+                                   e: 0xF0,
                                    extraCycles: 1,
                                    newPC: 0x0001,
-                                   newF: .newValue(RegisterBit.subtraction.value | RegisterBit.halfCarry.value),
-                                   newE: .newValue(0x42))
+                                   newF: .newValue(RegisterBit.subtraction.value | RegisterBit.carry.value),
+                                   newE: .newValue(0xEF))
     }
 
     @Test mutating func decH() async throws {
@@ -712,7 +712,7 @@ struct OpcodeTests {
                                    h: 0x43,
                                    extraCycles: 1,
                                    newPC: 0x0001,
-                                   newF: .newValue(RegisterBit.subtraction.value | RegisterBit.halfCarry.value),
+                                   newF: .newValue(RegisterBit.subtraction.value | RegisterBit.halfCarry.value | RegisterBit.carry.value),
                                    newH: .newValue(0x42))
     }
 
@@ -721,7 +721,7 @@ struct OpcodeTests {
                                    l: 0x43,
                                    extraCycles: 1,
                                    newPC: 0x0001,
-                                   newF: .newValue(RegisterBit.subtraction.value | RegisterBit.halfCarry.value),
+                                   newF: .newValue(RegisterBit.subtraction.value | RegisterBit.halfCarry.value | RegisterBit.carry.value),
                                    newL: .newValue(0x42))
     }
 
@@ -731,7 +731,7 @@ struct OpcodeTests {
                                    l: 0x01,
                                    extraCycles: 3,
                                    newPC: 0x0001,
-                                   newF: .newValue(RegisterBit.subtraction.value | RegisterBit.halfCarry.value),
+                                   newF: .newValue(RegisterBit.subtraction.value | RegisterBit.halfCarry.value | RegisterBit.carry.value),
                                    memoryChanges: [0x0001: 0x42])
     }
 
@@ -741,7 +741,7 @@ struct OpcodeTests {
                                    extraCycles: 1,
                                    newPC: 0x0001,
                                    newA: .newValue(0x42),
-                                   newF: .newValue(RegisterBit.subtraction.value | RegisterBit.halfCarry.value))
+                                   newF: .newValue(RegisterBit.subtraction.value | RegisterBit.halfCarry.value | RegisterBit.carry.value))
     }
 
     @Test mutating func addBCToHL() async throws {
@@ -1443,6 +1443,198 @@ struct OpcodeTests {
                                    newPC: 0x0001,
                                    newA: .newValue(0x42),
                                    newF: .unchanged)
+    }
+
+    @Test mutating func subBFromA() async throws {
+        try await self.testProgram(program: [0x90],
+                                   a: 0x63,
+                                   f: 0x00,
+                                   b: 0x21,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newA: .newValue(0x42),
+                                   newF: .newValue(RegisterBit.subtraction.value | RegisterBit.halfCarry.value | RegisterBit.carry.value),
+                                   newB: .unchanged)
+    }
+
+    @Test mutating func subCFromA() async throws {
+        try await self.testProgram(program: [0x91],
+                                   a: 0xE0,
+                                   f: 0x00,
+                                   c: 0xF0,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newA: .newValue(0xF0),
+                                   newF: .newValue(RegisterBit.subtraction.value | RegisterBit.halfCarry.value),
+                                   newC: .unchanged)
+    }
+
+    @Test mutating func subDFromA() async throws {
+        try await self.testProgram(program: [0x92],
+                                   a: 0x10,
+                                   f: 0x00,
+                                   d: 0x01,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newA: .newValue(0x0F),
+                                   newF: .newValue(RegisterBit.subtraction.value | RegisterBit.carry.value),
+                                   newD: .unchanged)
+    }
+
+    @Test mutating func subEFromA() async throws {
+        try await self.testProgram(program: [0x93],
+                                   a: 0x00,
+                                   f: 0x00,
+                                   e: 0x01,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newA: .newValue(0xFF),
+                                   newF: .newValue(RegisterBit.subtraction.value),
+                                   newE: .unchanged)
+    }
+
+    @Test mutating func subHFromA() async throws {
+        try await self.testProgram(program: [0x94],
+                                   a: 0x01,
+                                   f: 0x00,
+                                   h: 0x01,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newA: .newValue(0x00),
+                                   newF: .newValue(RegisterBit.subtraction.value | RegisterBit.zero.value | RegisterBit.halfCarry.value | RegisterBit.carry.value),
+                                   newH: .unchanged)
+    }
+
+    @Test mutating func subLFromA() async throws {
+        try await self.testProgram(program: [0x95],
+                                   a: 0x63,
+                                   f: 0x00,
+                                   l: 0x21,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newA: .newValue(0x42),
+                                   newF: .newValue(RegisterBit.subtraction.value | RegisterBit.halfCarry.value | RegisterBit.carry.value),
+                                   newL: .unchanged)
+    }
+
+    @Test mutating func subHLIndirectFromA() async throws {
+        try await self.testProgram(program: [0x96, 0x21],
+                                   a: 0x63,
+                                   f: 0x00,
+                                   h: 0x00,
+                                   l: 0x01,
+                                   extraCycles: 2,
+                                   newPC: 0x0001,
+                                   newA: .newValue(0x42),
+                                   newF: .newValue(RegisterBit.subtraction.value | RegisterBit.halfCarry.value | RegisterBit.carry.value),
+                                   newH: .unchanged,
+                                   newL: .unchanged)
+    }
+
+    @Test mutating func subAFromA() async throws {
+        try await self.testProgram(program: [0x97],
+                                   a: 0x42,
+                                   f: 0x00,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newA: .newValue(0x00),
+                                   newF: .newValue(RegisterBit.subtraction.value | RegisterBit.zero.value | RegisterBit.halfCarry.value | RegisterBit.carry.value))
+    }
+
+    @Test mutating func sbcBFromA() async throws {
+        try await self.testProgram(program: [0x98],
+                                   a: 0x63,
+                                   f: 0x00,
+                                   b: 0x21,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newA: .newValue(0x42),
+                                   newF: .newValue(RegisterBit.subtraction.value | RegisterBit.halfCarry.value | RegisterBit.carry.value),
+                                   newB: .unchanged)
+    }
+
+    @Test mutating func sbcCFromA() async throws {
+        try await self.testProgram(program: [0x99],
+                                   a: 0xE0,
+                                   f: 0x00,
+                                   c: 0xF0,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newA: .newValue(0xF0),
+                                   newF: .newValue(RegisterBit.subtraction.value | RegisterBit.halfCarry.value),
+                                   newC: .unchanged)
+    }
+
+    @Test mutating func sbcDFromA() async throws {
+        try await self.testProgram(program: [0x9A],
+                                   a: 0x10,
+                                   f: 0x00,
+                                   d: 0x01,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newA: .newValue(0x0F),
+                                   newF: .newValue(RegisterBit.subtraction.value | RegisterBit.carry.value),
+                                   newD: .unchanged)
+    }
+
+    @Test mutating func sbcEFromA() async throws {
+        try await self.testProgram(program: [0x9B],
+                                   a: 0x00,
+                                   f: 0x00,
+                                   e: 0x01,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newA: .newValue(0xFF),
+                                   newF: .newValue(RegisterBit.subtraction.value),
+                                   newE: .unchanged)
+    }
+
+    @Test mutating func sbcHFromA() async throws {
+        try await self.testProgram(program: [0x9C],
+                                   a: 0x01,
+                                   f: 0x00,
+                                   h: 0x01,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newA: .newValue(0x00),
+                                   newF: .newValue(RegisterBit.subtraction.value | RegisterBit.zero.value | RegisterBit.halfCarry.value | RegisterBit.carry.value),
+                                   newH: .unchanged)
+    }
+
+    @Test mutating func sbcLFromA() async throws {
+        try await self.testProgram(program: [0x9D],
+                                   a: 0x64,
+                                   f: 0x10,
+                                   l: 0x21,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newA: .newValue(0x42),
+                                   newF: .newValue(RegisterBit.subtraction.value | RegisterBit.halfCarry.value | RegisterBit.carry.value),
+                                   newL: .unchanged)
+    }
+
+    @Test mutating func sbcHLIndirectFromA() async throws {
+        try await self.testProgram(program: [0x9E, 0x01],
+                                   a: 0x01,
+                                   f: 0x10,
+                                   h: 0x00,
+                                   l: 0x01,
+                                   extraCycles: 2,
+                                   newPC: 0x0001,
+                                   newA: .newValue(0xFF),
+                                   newF: .newValue(RegisterBit.subtraction.value),
+                                   newH: .unchanged,
+                                   newL: .unchanged)
+    }
+
+    @Test mutating func sbcAFromA() async throws {
+        try await self.testProgram(program: [0x9F],
+                                   a: 0x42,
+                                   f: 0x10,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newA: .newValue(0xFF),
+                                   newF: .newValue(RegisterBit.subtraction.value))
     }
 
     mutating func testProgram(program: [UInt8],

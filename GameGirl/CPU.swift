@@ -188,6 +188,10 @@ extension CPU {
             self.addToA(from: Opcode.Register8Target(atBit0Of: opcode)!)
         case .adcBToA, .adcCToA, .adcDToA, .adcEToA, .adcHToA, .adcLToA, .adcHLIndirectToA, .adcAToA:
             self.adcToA(from: Opcode.Register8Target(atBit0Of: opcode)!)
+        case .subBFromA, .subCFromA, .subDFromA, .subEFromA, .subHFromA, .subLFromA, .subHLIndirectFromA, .subAFromA:
+            self.subFromA(from: Opcode.Register8Target(atBit0Of: opcode)!)
+        case .sbcBFromA, .sbcCFromA, .sbcDFromA, .sbcEFromA, .sbcHFromA, .sbcLFromA, .sbcHLIndirectFromA, .sbcAFromA:
+            self.sbcFromA(from: Opcode.Register8Target(atBit0Of: opcode)!)
         }
     }
 
@@ -395,15 +399,13 @@ extension CPU {
     }
 
     mutating func decrementRegister(target: Opcode.Register8Target) {
-        let oldRegister = self[target]
+        let oldValue = self[target]
 
-        let newRegister = oldRegister &- 1
-        // NOTA BENE: Per the GameBoy technical manual, we need to set the half carry
-        // flag if there was _not_ a borrow.
-        self.f[.halfCarry] = (((oldRegister & 0x0F) &- 0x01) & 0x10) != 0x10
-        self.f[.zero] = newRegister == 0
+        let newValue: Register8
+        (newValue, self.f[.carry], self.f[.halfCarry]) = oldValue.subtractingReportingCarries(1)
+        self.f[.zero] = newValue == 0
         self.f[.subtraction] = true
-        self[target] = newRegister
+        self[target] = newValue
     }
 
     mutating func addToHL(from: Opcode.Register16Target) {
@@ -431,24 +433,38 @@ extension CPU {
     }
 
     mutating func addToA(from: Opcode.Register8Target) {
+        self.addToAImpl(from: from, carry: false)
+    }
+
+    mutating func adcToA(from: Opcode.Register8Target) {
+        self.addToAImpl(from: from, carry: self.f[.carry])
+    }
+
+    mutating func addToAImpl(from: Opcode.Register8Target, carry: Bool) {
         // NOTA BENE: We cache the value here once to avoid incurring extra cycles
         // for when we read from actual memory
         let fromValue = self[from]
 
-        (self.a, self.f[.carry], self.f[.halfCarry]) = self.a.addingReportingCarries(fromValue)
+        (self.a, self.f[.carry], self.f[.halfCarry]) = self.a.addingReportingCarries(fromValue, carry: carry)
         self.f[.zero] = self.a == 0
         self.f[.subtraction] = false
     }
 
-    // TODO: THink about a helper overload for addingReportingOverflow() that takes two args
+    mutating func subFromA(from: Opcode.Register8Target) {
+        self.subFromAImpl(from: from, carry: false)
+    }
 
-    mutating func adcToA(from: Opcode.Register8Target) {
+    mutating func sbcFromA(from: Opcode.Register8Target) {
+        self.subFromAImpl(from: from, carry: self.f[.carry])
+    }
+
+    mutating func subFromAImpl(from: Opcode.Register8Target, carry: Bool) {
         // NOTA BENE: We cache the value here once to avoid incurring extra cycles
         // for when we read from actual memory
         let fromValue = self[from]
 
-        (self.a, self.f[.carry], self.f[.halfCarry]) = self.a.addingReportingCarries(fromValue, carry: self.f[.carry])
+        (self.a, self.f[.carry], self.f[.halfCarry]) = self.a.subtractingReportingCarries(fromValue, carry: carry)
         self.f[.zero] = self.a == 0
-        self.f[.subtraction] = false
+        self.f[.subtraction] = true
     }
 }
