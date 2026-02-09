@@ -96,6 +96,60 @@ extension CPU {
             }
         }
     }
+
+    subscript(_ index: Opcode.Register16Target) -> UInt16 {
+        mutating get {
+            switch index {
+            case .bc: return self.bc
+            case .de: return self.de
+            case .hl: return self.hl
+            case .sp: return self.sp
+            }
+        }
+        set {
+            switch index {
+            case .bc: self.bc = newValue
+            case .de: self.de = newValue
+            case .hl: self.hl = newValue
+            case .sp: self.sp = newValue
+            }
+        }
+    }
+
+    subscript(_ index: Opcode.IndirectMemoryTarget) -> UInt8 {
+        mutating get {
+            switch index {
+            case .bc:
+                return readMemory(address: self.bc)
+            case .de:
+                return readMemory(address: self.de)
+            case .hli:
+                defer {
+                    self.hl += 1
+                }
+                return readMemory(address: self.hl)
+            case .hld:
+                defer {
+                    self.hl -= 1
+                }
+                return readMemory(address: self.hl)
+            }
+        }
+        set {
+            switch index {
+            case .bc:
+                self.writeMemory(address: self.bc, byte: newValue)
+            case .de:
+                self.writeMemory(address: self.de, byte: newValue)
+            case .hli:
+                self.writeMemory(address: self.hl, byte: newValue)
+                self.hl += 1
+            case .hld:
+                self.writeMemory(address: self.hl, byte: newValue)
+                self.hl -= 1
+            }
+        }
+    }
 }
 
 extension CPU {
@@ -141,7 +195,7 @@ extension CPU {
         case .ldBCFromImmediate, .ldDEFromImmediate, .ldHLFromImmediate, .ldSPFromImmediate:
             self.load(target: Opcode.Register16Target(opcode: opcode)!)
         case .ldBCIndirectFromA, .ldDEIndirectFromA, .ldHLIndirectFromAAndIncrement, .ldHLIndirectFromAAndDecrement:
-            self.loadMemory(target: Opcode.IndirectMemoryTarget(opcode: opcode)!)
+            self.writeMemoryFromA(target: Opcode.IndirectMemoryTarget(opcode: opcode)!)
         case .incBC, .incDE, .incHL, .incSP:
             self.incrementRegister(target: Opcode.Register16Target(opcode: opcode)!)
         case .incB, .incC, .incD, .incE, .incH, .incL, .incHLIndirect, .incA:
@@ -171,7 +225,7 @@ extension CPU {
         case .addBCToHL, .addDEToHL, .addHLToHL, .addSPToHL:
             self.addToHL(from: Opcode.Register16Target(opcode: opcode)!)
         case .ldAFromBCIndirect, .ldAFromDEIndirect, .ldAFromHLIndirectAndIncrement, .ldAFromHLIndirectAndDecrement:
-            self.loadAFromMemory(target: Opcode.IndirectMemoryTarget(opcode: opcode)!)
+            self.writeAFromMemory(target: Opcode.IndirectMemoryTarget(opcode: opcode)!)
         case .decBC, .decDE, .decHL, .decSP:
             self.decrementRegister(target: Opcode.Register16Target(opcode: opcode)!)
         case .ldBFromB, .ldBFromC, .ldBFromD, .ldBFromE, .ldBFromH, .ldBFromL, .ldBFromHLIndirect,
@@ -217,69 +271,21 @@ extension CPU {
     mutating func load(target: Opcode.Register16Target) {
         let word = self.readProgramWord()
 
-        switch target {
-        case .bc:
-            self.bc = word
-        case .de:
-            self.de = word
-        case .hl:
-            self.hl = word
-        case .sp:
-            self.sp = word
-        }
+        self[target] = word
     }
 
     mutating func load(target: Opcode.Register8Target) {
         let byte = self.readProgramByte()
 
-        switch target {
-        case .b:
-            self.b = byte
-        case .c:
-            self.c = byte
-        case .d:
-            self.d = byte
-        case .e:
-            self.e = byte
-        case .h:
-            self.h = byte
-        case .l:
-            self.l = byte
-        case .hlIndirect:
-            self.writeMemory(address: self.hl, byte: byte)
-        case .a:
-            self.a = byte
-        }
+        self[target] = byte
     }
 
-    mutating func loadMemory(target: Opcode.IndirectMemoryTarget) {
-        switch target {
-        case .bc:
-            self.writeMemory(address: self.bc, byte: self.a)
-        case .de:
-            self.writeMemory(address: self.de, byte: self.a)
-        case .hli:
-            self.writeMemory(address: self.hl, byte: self.a)
-            self.hl += 1
-        case .hld:
-            self.writeMemory(address: self.hl, byte: self.a)
-            self.hl -= 1
-        }
+    mutating func writeMemoryFromA(target: Opcode.IndirectMemoryTarget) {
+        self[target] = self.a
     }
 
-    mutating func loadAFromMemory(target: Opcode.IndirectMemoryTarget) {
-        switch target {
-        case .bc:
-            self.a = readMemory(address: self.bc)
-        case .de:
-            self.a = readMemory(address: self.de)
-        case .hli:
-            self.a = readMemory(address: self.hl)
-            self.hl += 1
-        case .hld:
-            self.a = readMemory(address: self.hl)
-            self.hl -= 1
-        }
+    mutating func writeAFromMemory(target: Opcode.IndirectMemoryTarget) {
+        self.a = self[target]
     }
 
     mutating func loadMemoryFromSP() {
@@ -289,16 +295,7 @@ extension CPU {
     }
 
     mutating func incrementRegister(target: Opcode.Register16Target) {
-        switch target {
-        case .bc:
-            self.bc &+= 1
-        case .de:
-            self.de &+= 1
-        case .hl:
-            self.hl &+= 1
-        case .sp:
-            self.sp &+= 1
-        }
+        self[target] &+= 1
 
         // NOTA BENE: This set of instructions incurs an extra cycle
         self.cycles += 1
@@ -391,16 +388,7 @@ extension CPU {
     }
 
     mutating func decrementRegister(target: Opcode.Register16Target) {
-        switch target {
-        case .bc:
-            self.bc &-= 1
-        case .de:
-            self.de &-= 1
-        case .hl:
-            self.hl &-= 1
-        case .sp:
-            self.sp &-= 1
-        }
+        self[target] &-= 1
 
         // NOTA BENE: This set of instructions incurs an extra cycle
         self.cycles += 1
@@ -417,19 +405,10 @@ extension CPU {
     }
 
     mutating func addToHL(from: Opcode.Register16Target) {
-        let fromRegister = switch from {
-        case .bc:
-            self.bc
-        case .de:
-            self.de
-        case .hl:
-            self.hl
-        case .sp:
-            self.sp
-        }
+        let fromValue = self[from]
 
-        (_, self.f[.halfCarry]) = ((self.hl & 0x0FFF) << 4).addingReportingOverflow((fromRegister & 0x0FFF) << 4)
-        (self.hl, self.f[.carry]) = self.hl.addingReportingOverflow(fromRegister)
+        (_, self.f[.halfCarry]) = ((self.hl & 0x0FFF) << 4).addingReportingOverflow((fromValue & 0x0FFF) << 4)
+        (self.hl, self.f[.carry]) = self.hl.addingReportingOverflow(fromValue)
         self.f[.subtraction] = false
 
         // NOTA BENE: This set of instructions incurs an extra cycle
