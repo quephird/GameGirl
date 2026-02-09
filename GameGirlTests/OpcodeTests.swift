@@ -1637,6 +1637,390 @@ struct OpcodeTests {
                                    newF: .newValue(RegisterBit.subtraction.value))
     }
 
+    @Test mutating func andAWithB() async throws {
+        try await self.testProgram(program: [0xA0],
+                                   a: 0xFF,
+                                   f: 0x00,
+                                   b: 0xFF,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newA: .newValue(0xFF),
+                                   newF: .newValue(RegisterBit.halfCarry.value),
+                                   newB: .unchanged)
+    }
+
+    @Test mutating func andAWithC() async throws {
+        try await self.testProgram(program: [0xA1],
+                                   a: 0xFF,
+                                   f: 0x00,
+                                   c: 0x00,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newA: .newValue(0x00),
+                                   newF: .newValue(RegisterBit.zero.value | RegisterBit.halfCarry.value),
+                                   newB: .unchanged)
+    }
+
+    @Test mutating func andAWithD() async throws {
+        try await self.testProgram(program: [0xA2],
+                                   a: 0x55,
+                                   f: 0x00,
+                                   d: 0x5A,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newA: .newValue(0x50),
+                                   newF: .newValue(RegisterBit.halfCarry.value),
+                                   newD: .unchanged)
+    }
+
+    @Test mutating func andAWithE() async throws {
+        try await self.testProgram(program: [0xA3],
+                                   a: 0x55,
+                                   f: 0x00,
+                                   e: 0xAA,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newA: .newValue(0x00),
+                                   newF: .newValue(RegisterBit.zero.value | RegisterBit.halfCarry.value),
+                                   newE: .unchanged)
+    }
+
+    @Test mutating func andAWithH() async throws {
+        try await self.testProgram(program: [0xA4],
+                                   a: 0xE7,
+                                   f: 0x00,
+                                   h: 0x7E,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newA: .newValue(0x66),
+                                   newF: .newValue(RegisterBit.halfCarry.value),
+                                   newH: .unchanged)
+    }
+
+    @Test mutating func andAWithL() async throws {
+        try await self.testProgram(program: [0xA5],
+                                   a: 0xC3,
+                                   f: 0x00,
+                                   l: 0x3C,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newA: .newValue(0x00),
+                                   newF: .newValue(RegisterBit.zero.value | RegisterBit.halfCarry.value),
+                                   newL: .unchanged)
+    }
+
+    @Test mutating func andAFromHLIndirect() async throws {
+        try await self.testProgram(program: [0xA6, 0xAA],
+                                   a: 0x55,
+                                   f: 0x00,
+                                   h: 0x00,
+                                   l: 0x01,
+                                   extraCycles: 2,
+                                   newPC: 0x0001,
+                                   newA: .newValue(0x00),
+                                   newF: .newValue(RegisterBit.zero.value | RegisterBit.halfCarry.value),
+                                   newH: .unchanged,
+                                   newL: .unchanged)
+    }
+
+    @Test mutating func andAWithA() async throws {
+        try await self.testProgram(program: [0xA7],
+                                   a: 0x42,
+                                   f: 0x00,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newA: .unchanged,
+                                   newF: .newValue(RegisterBit.halfCarry.value))
+    }
+
+    @Test mutating func xorAWithB() async throws {
+        try await self.testProgram(program: [0xA8],
+                                   a: 0xFF,
+                                   f: 0x00,
+                                   b: 0x00,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newA: .newValue(0xFF),
+                                   newF: .unchanged,
+                                   newB: .unchanged)
+    }
+
+    @Test mutating func xorAWithC() async throws {
+        try await self.testProgram(program: [0xA9],
+                                   a: 0xFF,
+                                   f: 0x00,
+                                   c: 0xFF,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newA: .newValue(0x00),
+                                   newF: .newValue(RegisterBit.zero.value),
+                                   newC: .unchanged)
+    }
+
+    @Test mutating func xorAWithD() async throws {
+        try await self.testProgram(program: [0xAA],
+                                   a: 0x55,
+                                   f: 0x00,
+                                   d: 0xAA,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newA: .newValue(0xFF),
+                                   newF: .unchanged,
+                                   newD: .unchanged)
+    }
+
+    @Test mutating func xorAWithE() async throws {
+        try await self.testProgram(program: [0xAB],
+                                   a: 0xF0,
+                                   f: 0x00,
+                                   e: 0x0F,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newA: .newValue(0xFF),
+                                   newF: .unchanged,
+                                   newE: .unchanged)
+    }
+
+    @Test mutating func xorAWithH() async throws {
+        try await self.testProgram(program: [0xAC],
+                                   a: 0xE7,
+                                   f: 0x00,
+                                   h: 0xE7,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newA: .newValue(0x00),
+                                   newF: .newValue(RegisterBit.zero.value),
+                                   newH: .unchanged)
+    }
+
+    @Test mutating func xorAWithL() async throws {
+        try await self.testProgram(program: [0xAD],
+                                   a: 0xC3,
+                                   f: 0x00,
+                                   l: 0x3C,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newA: .newValue(0xFF),
+                                   newF: .unchanged,
+                                   newL: .unchanged)
+    }
+
+    @Test mutating func xorAFromHLIndirect() async throws {
+        try await self.testProgram(program: [0xAE, 0xAA],
+                                   a: 0xAA,
+                                   f: 0x00,
+                                   h: 0x00,
+                                   l: 0x01,
+                                   extraCycles: 2,
+                                   newPC: 0x0001,
+                                   newA: .newValue(0x00),
+                                   newF: .newValue(RegisterBit.zero.value),
+                                   newH: .unchanged,
+                                   newL: .unchanged)
+    }
+
+    @Test mutating func xorAWithA() async throws {
+        try await self.testProgram(program: [0xAF],
+                                   a: 0x42,
+                                   f: 0x00,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newA: .newValue(0x00),
+                                   newF: .newValue(RegisterBit.zero.value))
+    }
+
+    @Test mutating func orAWithB() async throws {
+        try await self.testProgram(program: [0xB0],
+                                   a: 0x33,
+                                   f: 0x00,
+                                   b: 0xCC,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newA: .newValue(0xFF),
+                                   newF: .unchanged,
+                                   newB: .unchanged)
+    }
+
+    @Test mutating func orAWithC() async throws {
+        try await self.testProgram(program: [0xB1],
+                                   a: 0x00,
+                                   f: 0x00,
+                                   c: 0x00,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newA: .newValue(0x00),
+                                   newF: .newValue(RegisterBit.zero.value),
+                                   newC: .unchanged)
+    }
+
+    @Test mutating func orAWithD() async throws {
+        try await self.testProgram(program: [0xB2],
+                                   a: 0x80,
+                                   f: 0x00,
+                                   d: 0x01,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newA: .newValue(0x81),
+                                   newF: .unchanged,
+                                   newD: .unchanged)
+    }
+
+    @Test mutating func orAWithE() async throws {
+        try await self.testProgram(program: [0xB3],
+                                   a: 0xE0,
+                                   f: 0x00,
+                                   e: 0x1F,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newA: .newValue(0xFF),
+                                   newF: .unchanged,
+                                   newE: .unchanged)
+    }
+
+    @Test mutating func orAWithH() async throws {
+        try await self.testProgram(program: [0xB4],
+                                   a: 0x00,
+                                   f: 0x00,
+                                   h: 0x00,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newA: .newValue(0x00),
+                                   newF: .newValue(RegisterBit.zero.value),
+                                   newH: .unchanged)
+    }
+
+    @Test mutating func orAWithL() async throws {
+        try await self.testProgram(program: [0xB5],
+                                   a: 0xF0,
+                                   f: 0x00,
+                                   l: 0x0F,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newA: .newValue(0xFF),
+                                   newF: .unchanged,
+                                   newL: .unchanged)
+    }
+
+    @Test mutating func orAFromHLIndirect() async throws {
+        try await self.testProgram(program: [0xB6, 0xAA],
+                                   a: 0x55,
+                                   f: 0x00,
+                                   h: 0x00,
+                                   l: 0x01,
+                                   extraCycles: 2,
+                                   newPC: 0x0001,
+                                   newA: .newValue(0xFF),
+                                   newF: .unchanged,
+                                   newH: .unchanged,
+                                   newL: .unchanged)
+    }
+
+    @Test mutating func orAWithA() async throws {
+        try await self.testProgram(program: [0xB7],
+                                   a: 0x42,
+                                   f: 0x00,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newA: .unchanged,
+                                   newF: .unchanged)
+    }
+
+    @Test mutating func cpAWithB() async throws {
+        try await self.testProgram(program: [0xB8],
+                                   a: 0x42,
+                                   f: 0x00,
+                                   b: 0x41,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newA: .unchanged,
+                                   newF: .newValue(RegisterBit.subtraction.value | RegisterBit.halfCarry.value | RegisterBit.carry.value),
+                                   newB: .unchanged)
+    }
+
+    @Test mutating func cpAWithC() async throws {
+        try await self.testProgram(program: [0xB9],
+                                   a: 0x42,
+                                   f: 0x00,
+                                   c: 0x42,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newA: .unchanged,
+                                   newF: .newValue(RegisterBit.subtraction.value | RegisterBit.zero.value | RegisterBit.halfCarry.value | RegisterBit.carry.value),
+                                   newC: .unchanged)
+    }
+
+    @Test mutating func cpAWithD() async throws {
+        try await self.testProgram(program: [0xBA],
+                                   a: 0x10,
+                                   f: 0x00,
+                                   d: 0x01,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newA: .unchanged,
+                                   newF: .newValue(RegisterBit.subtraction.value | RegisterBit.carry.value),
+                                   newD: .unchanged)
+    }
+
+    @Test mutating func cpAWithE() async throws {
+        try await self.testProgram(program: [0xBB],
+                                   a: 0xE0,
+                                   f: 0x00,
+                                   e: 0xF0,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newA: .unchanged,
+                                   newF: .newValue(RegisterBit.subtraction.value | RegisterBit.halfCarry.value),
+                                   newE: .unchanged)
+    }
+
+    @Test mutating func cpAWithH() async throws {
+        try await self.testProgram(program: [0xBC],
+                                   a: 0x00,
+                                   f: 0x00,
+                                   h: 0xFF,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newA: .unchanged,
+                                   newF: .newValue(RegisterBit.subtraction.value),
+                                   newH: .unchanged)
+    }
+
+    @Test mutating func cpAWithL() async throws {
+        try await self.testProgram(program: [0xBD],
+                                   a: 0x00,
+                                   f: 0x00,
+                                   l: 0x00,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newA: .unchanged,
+                                   newF: .newValue(RegisterBit.subtraction.value | RegisterBit.zero.value | RegisterBit.halfCarry.value | RegisterBit.carry.value),
+                                   newL: .unchanged)
+    }
+
+    @Test mutating func cpAFromHLIndirect() async throws {
+        try await self.testProgram(program: [0xBE, 0xEF],
+                                   a: 0xFE,
+                                   f: 0x00,
+                                   h: 0x00,
+                                   l: 0x01,
+                                   extraCycles: 2,
+                                   newPC: 0x0001,
+                                   newA: .unchanged,
+                                   newF: .newValue(RegisterBit.subtraction.value | RegisterBit.carry.value),
+                                   newH: .unchanged,
+                                   newL: .unchanged)
+    }
+
+    @Test mutating func cpAWithA() async throws {
+        try await self.testProgram(program: [0xBF],
+                                   a: 0x42,
+                                   f: 0x00,
+                                   extraCycles: 1,
+                                   newPC: 0x0001,
+                                   newA: .unchanged,
+                                   newF: .newValue(RegisterBit.subtraction.value | RegisterBit.zero.value | RegisterBit.halfCarry.value | RegisterBit.carry.value))
+    }
+
     mutating func testProgram(program: [UInt8],
                               pc: UInt16 = 0x0000,
                               sp: UInt16 = 0x0000,

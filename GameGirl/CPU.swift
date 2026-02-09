@@ -192,6 +192,14 @@ extension CPU {
             self.subFromA(from: Opcode.Register8Target(atBit0Of: opcode)!)
         case .sbcBFromA, .sbcCFromA, .sbcDFromA, .sbcEFromA, .sbcHFromA, .sbcLFromA, .sbcHLIndirectFromA, .sbcAFromA:
             self.sbcFromA(from: Opcode.Register8Target(atBit0Of: opcode)!)
+        case .andAWithB, .andAWithC, .andAWithD, .andAWithE, .andAWithH, .andAWithL, .andAWithHLIndirect, .andAWithA:
+            self.andA(with: Opcode.Register8Target(atBit0Of: opcode)!)
+        case .xorAWithB, .xorAWithC, .xorAWithD, .xorAWithE, .xorAWithH, .xorAWithL, .xorAWithHLIndirect, .xorAWithA:
+            self.xorA(with: Opcode.Register8Target(atBit0Of: opcode)!)
+        case .orAWithB, .orAWithC, .orAWithD, .orAWithE, .orAWithH, .orAWithL, .orAWithHLIndirect, .orAWithA:
+            self.orA(with: Opcode.Register8Target(atBit0Of: opcode)!)
+        case .cpAWithB, .cpAWithC, .cpAWithD, .cpAWithE, .cpAWithH, .cpAWithL, .cpAWithHLIndirect, .cpAWithA:
+            self.cpA(with: Opcode.Register8Target(atBit0Of: opcode)!)
         }
     }
 
@@ -466,5 +474,39 @@ extension CPU {
         (self.a, self.f[.carry], self.f[.halfCarry]) = self.a.subtractingReportingCarries(fromValue, carry: carry)
         self.f[.zero] = self.a == 0
         self.f[.subtraction] = true
+    }
+
+    mutating func andA(with: Opcode.Register8Target) {
+        self.a &= self[with]
+        self.f[.zero] = self.a == 0
+        self.f[.subtraction] = false
+        self.f[.halfCarry] = true
+        self.f[.carry] = false
+    }
+
+    mutating func xorA(with: Opcode.Register8Target) {
+        self.a ^= self[with]
+        self.f[.zero] = self.a == 0
+        self.f[.subtraction] = false
+        self.f[.halfCarry] = false
+        self.f[.carry] = false
+    }
+
+    mutating func orA(with: Opcode.Register8Target) {
+        self.a |= self[with]
+        self.f[.zero] = self.a == 0
+        self.f[.subtraction] = false
+        self.f[.halfCarry] = false
+        self.f[.carry] = false
+    }
+
+    mutating func cpA(with: Opcode.Register8Target) {
+        // NOTA BENE: We cache the value here once to avoid incurring extra cycles
+        // for when we read from actual memory
+        let withValue = self[with]
+
+        self.f[.zero] = self.a == withValue
+        self.f[.subtraction] = true
+        (_, self.f[.carry], self.f[.halfCarry]) = self.a.subtractingReportingCarries(withValue)
     }
 }

@@ -144,6 +144,38 @@ enum Opcode: UInt8 {
     case sbcLFromA = 0x9D
     case sbcHLIndirectFromA = 0x9E
     case sbcAFromA = 0x9F
+    case andAWithB = 0xA0
+    case andAWithC = 0xA1
+    case andAWithD = 0xA2
+    case andAWithE = 0xA3
+    case andAWithH = 0xA4
+    case andAWithL = 0xA5
+    case andAWithHLIndirect = 0xA6
+    case andAWithA = 0xA7
+    case xorAWithB = 0xA8
+    case xorAWithC = 0xA9
+    case xorAWithD = 0xAA
+    case xorAWithE = 0xAB
+    case xorAWithH = 0xAC
+    case xorAWithL = 0xAD
+    case xorAWithHLIndirect = 0xAE
+    case xorAWithA = 0xAF
+    case orAWithB = 0xB0
+    case orAWithC = 0xB1
+    case orAWithD = 0xB2
+    case orAWithE = 0xB3
+    case orAWithH = 0xB4
+    case orAWithL = 0xB5
+    case orAWithHLIndirect = 0xB6
+    case orAWithA = 0xB7
+    case cpAWithB = 0xB8
+    case cpAWithC = 0xB9
+    case cpAWithD = 0xBA
+    case cpAWithE = 0xBB
+    case cpAWithH = 0xBC
+    case cpAWithL = 0xBD
+    case cpAWithHLIndirect = 0xBE
+    case cpAWithA = 0xBF
 }
 
 extension Opcode {
@@ -221,6 +253,10 @@ extension Opcode {
         case .adcBToA, .adcCToA, .adcDToA, .adcEToA, .adcHToA, .adcLToA, .adcHLIndirectToA, .adcAToA: 1
         case .subBFromA, .subCFromA, .subDFromA, .subEFromA, .subHFromA, .subLFromA, .subHLIndirectFromA, .subAFromA: 1
         case .sbcBFromA, .sbcCFromA, .sbcDFromA, .sbcEFromA, .sbcHFromA, .sbcLFromA, .sbcHLIndirectFromA, .sbcAFromA: 1
+        case .andAWithB, .andAWithC, .andAWithD, .andAWithE, .andAWithH, .andAWithL, .andAWithHLIndirect, .andAWithA: 1
+        case .xorAWithB, .xorAWithC, .xorAWithD, .xorAWithE, .xorAWithH, .xorAWithL, .xorAWithHLIndirect, .xorAWithA: 1
+        case .orAWithB, .orAWithC, .orAWithD, .orAWithE, .orAWithH, .orAWithL, .orAWithHLIndirect, .orAWithA: 1
+        case .cpAWithB, .cpAWithC, .cpAWithD, .cpAWithE, .cpAWithH, .cpAWithL, .cpAWithHLIndirect, .cpAWithA: 1
         }
     }
 }
@@ -261,6 +297,14 @@ extension Opcode {
         case .subHLIndirectFromA: 2
         case .sbcBFromA, .sbcCFromA, .sbcDFromA, .sbcEFromA, .sbcHFromA, .sbcLFromA, .sbcAFromA: 1
         case .sbcHLIndirectFromA: 2
+        case .andAWithB, .andAWithC, .andAWithD, .andAWithE, .andAWithH, .andAWithL, .andAWithA: 1
+        case .andAWithHLIndirect: 2
+        case .xorAWithB, .xorAWithC, .xorAWithD, .xorAWithE, .xorAWithH, .xorAWithL, .xorAWithA: 1
+        case .xorAWithHLIndirect: 2
+        case .orAWithB, .orAWithC, .orAWithD, .orAWithE, .orAWithH, .orAWithL, .orAWithA: 1
+        case .orAWithHLIndirect: 2
+        case .cpAWithB, .cpAWithC, .cpAWithD, .cpAWithE, .cpAWithH, .cpAWithL, .cpAWithA: 1
+        case .cpAWithHLIndirect: 2
         }
     }
 }
