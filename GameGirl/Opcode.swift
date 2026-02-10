@@ -176,6 +176,8 @@ enum Opcode: UInt8 {
     case cpAWithL = 0xBD
     case cpAWithHLIndirect = 0xBE
     case cpAWithA = 0xBF
+    case addImmediateToA = 0xC6
+    case adcImmediateToA = 0xCE
 }
 
 extension Opcode {
@@ -257,6 +259,8 @@ extension Opcode {
         case .xorAWithB, .xorAWithC, .xorAWithD, .xorAWithE, .xorAWithH, .xorAWithL, .xorAWithHLIndirect, .xorAWithA: 1
         case .orAWithB, .orAWithC, .orAWithD, .orAWithE, .orAWithH, .orAWithL, .orAWithHLIndirect, .orAWithA: 1
         case .cpAWithB, .cpAWithC, .cpAWithD, .cpAWithE, .cpAWithH, .cpAWithL, .cpAWithHLIndirect, .cpAWithA: 1
+        case .addImmediateToA: 2
+        case .adcImmediateToA: 2
         }
     }
 }
@@ -305,6 +309,8 @@ extension Opcode {
         case .orAWithHLIndirect: 2
         case .cpAWithB, .cpAWithC, .cpAWithD, .cpAWithE, .cpAWithH, .cpAWithL, .cpAWithA: 1
         case .cpAWithHLIndirect: 2
+        case .addImmediateToA: 2
+        case .adcImmediateToA: 2
         }
     }
 }

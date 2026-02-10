@@ -254,6 +254,10 @@ extension CPU {
             self.orA(with: Opcode.Register8Target(atBit0Of: opcode)!)
         case .cpAWithB, .cpAWithC, .cpAWithD, .cpAWithE, .cpAWithH, .cpAWithL, .cpAWithHLIndirect, .cpAWithA:
             self.cpA(with: Opcode.Register8Target(atBit0Of: opcode)!)
+        case .addImmediateToA:
+            self.addImmediateToA()
+        case .adcImmediateToA:
+            self.adcImmediateToA()
         }
     }
 
@@ -420,19 +424,31 @@ extension CPU {
     }
 
     mutating func addToA(from: Opcode.Register8Target) {
-        self.addToAImpl(from: from, carry: false)
+        let fromValue = self[from]
+
+        self.addToAImpl(value: fromValue, carry: false)
+    }
+
+    mutating func addImmediateToA() {
+        let value = self.readProgramByte()
+
+        self.addToAImpl(value: value, carry: false)
     }
 
     mutating func adcToA(from: Opcode.Register8Target) {
-        self.addToAImpl(from: from, carry: self.f[.carry])
-    }
-
-    mutating func addToAImpl(from: Opcode.Register8Target, carry: Bool) {
-        // NOTA BENE: We cache the value here once to avoid incurring extra cycles
-        // for when we read from actual memory
         let fromValue = self[from]
 
-        (self.a, self.f[.carry], self.f[.halfCarry]) = self.a.addingReportingCarries(fromValue, carry: carry)
+        self.addToAImpl(value: fromValue, carry: self.f[.carry])
+    }
+
+    mutating func adcImmediateToA() {
+        let value = self.readProgramByte()
+
+        self.addToAImpl(value: value, carry: self.f[.carry])
+    }
+
+    mutating func addToAImpl(value: UInt8, carry: Bool) {
+        (self.a, self.f[.carry], self.f[.halfCarry]) = self.a.addingReportingCarries(value, carry: carry)
         self.f[.zero] = self.a == 0
         self.f[.subtraction] = false
     }

@@ -2021,6 +2021,96 @@ struct OpcodeTests {
                                    newF: .newValue(RegisterBit.subtraction.value | RegisterBit.zero.value | RegisterBit.halfCarry.value | RegisterBit.carry.value))
     }
 
+    @Test mutating func addImmediateToANoFlagsSet() async throws {
+        try await self.testProgram(program: [0xC6, 0x21],
+                                   a: 0x21,
+                                   f: 0x00,
+                                   extraCycles: 2,
+                                   newPC: 0x0002,
+                                   newA: .newValue(0x42),
+                                   newF: .unchanged)
+    }
+
+    @Test mutating func addImmediateToAZeroFlagButNoCarry() async throws {
+        try await self.testProgram(program: [0xC6, 0x00],
+                                   a: 0x00,
+                                   f: 0x00,
+                                   extraCycles: 2,
+                                   newPC: 0x0002,
+                                   newA: .newValue(0x00),
+                                   newF: .newValue(RegisterBit.zero.value))
+    }
+
+    @Test mutating func addImmediateToACarryFlagButNoZero() async throws {
+        try await self.testProgram(program: [0xC6, 0xF0],
+                                   a: 0xF0,
+                                   f: 0x00,
+                                   extraCycles: 2,
+                                   newPC: 0x0002,
+                                   newA: .newValue(0xE0),
+                                   newF: .newValue(RegisterBit.carry.value))
+    }
+
+    @Test mutating func addImmediateToABothCarryFlagsSet() async throws {
+        try await self.testProgram(program: [0xC6, 0xFF],
+                                   a: 0xFF,
+                                   f: 0x00,
+                                   extraCycles: 2,
+                                   newPC: 0x0002,
+                                   newA: .newValue(0xFE),
+                                   newF: .newValue(RegisterBit.halfCarry.value | RegisterBit.carry.value))
+    }
+
+    @Test mutating func addImmediateToAZeroAndBothCarryFlagsSet() async throws {
+        try await self.testProgram(program: [0xC6, 0x01],
+                                   a: 0xFF,
+                                   f: 0x00,
+                                   extraCycles: 2,
+                                   newPC: 0x0002,
+                                   newA: .newValue(0x00),
+                                   newF: .newValue(RegisterBit.zero.value | RegisterBit.halfCarry.value | RegisterBit.carry.value))
+    }
+
+    @Test mutating func adcImmediateToACarryFlagReset() async throws {
+        try await self.testProgram(program: [0xCE, 0x20],
+                                   a: 0x21,
+                                   f: 0x10,
+                                   extraCycles: 2,
+                                   newPC: 0x0002,
+                                   newA: .newValue(0x42),
+                                   newF: .newValue(0x00))
+    }
+
+    @Test mutating func adcImmediateToAOnlyHalfCarryFlagSet() async throws {
+        try await self.testProgram(program: [0xCE, 0x01],
+                                   a: 0x0E,
+                                   f: 0x10,
+                                   extraCycles: 2,
+                                   newPC: 0x0002,
+                                   newA: .newValue(0x10),
+                                   newF: .newValue(RegisterBit.halfCarry.value))
+    }
+
+    @Test mutating func adcImmediateToAOnlyCarryFlagSet() async throws {
+        try await self.testProgram(program: [0xCE, 0xF0],
+                                   a: 0xF0,
+                                   f: 0x10,
+                                   extraCycles: 2,
+                                   newPC: 0x0002,
+                                   newA: .newValue(0xE1),
+                                   newF: .newValue(RegisterBit.carry.value))
+    }
+
+    @Test mutating func adcImmediateToAZeroAndBothCarryFlagsSet() async throws {
+        try await self.testProgram(program: [0xCE, 0x01],
+                                   a: 0xFE,
+                                   f: 0x10,
+                                   extraCycles: 2,
+                                   newPC: 0x0002,
+                                   newA: .newValue(0x00),
+                                   newF: .newValue(RegisterBit.zero.value | RegisterBit.halfCarry.value | RegisterBit.carry.value))
+    }
+
     mutating func testProgram(program: [UInt8],
                               pc: UInt16 = 0x0000,
                               sp: UInt16 = 0x0000,
