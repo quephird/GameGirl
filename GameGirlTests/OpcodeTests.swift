@@ -2111,6 +2111,106 @@ struct OpcodeTests {
                                    newF: .newValue(RegisterBit.zero.value | RegisterBit.halfCarry.value | RegisterBit.carry.value))
     }
 
+    @Test mutating func subImmediateFromABothCarriesSet() async throws {
+        try await self.testProgram(program: [0xD6, 0x21],
+                                   a: 0x63,
+                                   f: 0x00,
+                                   extraCycles: 2,
+                                   newPC: 0x0002,
+                                   newA: .newValue(0x42),
+                                   newF: .newValue(RegisterBit.subtraction.value | RegisterBit.halfCarry.value | RegisterBit.carry.value))
+    }
+
+    @Test mutating func subImmediateFromAOnlyHalfCarry() async throws {
+        try await self.testProgram(program: [0xD6, 0xF0],
+                                   a: 0xE0,
+                                   f: 0x00,
+                                   extraCycles: 2,
+                                   newPC: 0x0002,
+                                   newA: .newValue(0xF0),
+                                   newF: .newValue(RegisterBit.subtraction.value | RegisterBit.halfCarry.value))
+    }
+
+    @Test mutating func subImmediateFromAOnlyCarry() async throws {
+        try await self.testProgram(program: [0xD6, 0x0F],
+                                   a: 0x10,
+                                   f: 0x00,
+                                   extraCycles: 2,
+                                   newPC: 0x0002,
+                                   newA: .newValue(0x01),
+                                   newF: .newValue(RegisterBit.subtraction.value | RegisterBit.carry.value))
+    }
+
+    @Test mutating func subImmediateFromABothCarriesReset() async throws {
+        try await self.testProgram(program: [0xD6, 0x01],
+                                   a: 0x00,
+                                   f: 0x00,
+                                   extraCycles: 2,
+                                   newPC: 0x0002,
+                                   newA: .newValue(0xFF),
+                                   newF: .newValue(RegisterBit.subtraction.value))
+    }
+
+    @Test mutating func subImmediateFromAAllFlagsSet() async throws {
+        try await self.testProgram(program: [0xD6, 0x42],
+                                   a: 0x42,
+                                   f: 0x00,
+                                   extraCycles: 2,
+                                   newPC: 0x0002,
+                                   newA: .newValue(0x00),
+                                   newF: .newValue(RegisterBit.subtraction.value | RegisterBit.halfCarry.value | RegisterBit.carry.value | RegisterBit.zero.value))
+    }
+
+    @Test mutating func sbcImmediateFromABothCarriesSet() async throws {
+        try await self.testProgram(program: [0xDE, 0x20],
+                                   a: 0x63,
+                                   f: 0x10,
+                                   extraCycles: 2,
+                                   newPC: 0x0002,
+                                   newA: .newValue(0x42),
+                                   newF: .newValue(RegisterBit.subtraction.value | RegisterBit.halfCarry.value | RegisterBit.carry.value))
+    }
+
+    @Test mutating func sbcImmediateFromAOnlyHalfCarry() async throws {
+        try await self.testProgram(program: [0xDE, 0xF0],
+                                   a: 0xE1,
+                                   f: 0x10,
+                                   extraCycles: 2,
+                                   newPC: 0x0002,
+                                   newA: .newValue(0xF0),
+                                   newF: .newValue(RegisterBit.subtraction.value | RegisterBit.halfCarry.value))
+    }
+
+    @Test mutating func sbcImmediateFromAOnlyCarry() async throws {
+        try await self.testProgram(program: [0xDE, 0x00],
+                                   a: 0x10,
+                                   f: 0x10,
+                                   extraCycles: 2,
+                                   newPC: 0x0002,
+                                   newA: .newValue(0x0F),
+                                   newF: .newValue(RegisterBit.subtraction.value | RegisterBit.carry.value))
+    }
+
+    @Test mutating func sbcImmediateFromABothCarriesReset() async throws {
+        try await self.testProgram(program: [0xDE, 0x00],
+                                   a: 0x00,
+                                   f: 0x10,
+                                   extraCycles: 2,
+                                   newPC: 0x0002,
+                                   newA: .newValue(0xFF),
+                                   newF: .newValue(RegisterBit.subtraction.value))
+    }
+
+    @Test mutating func sbcImmediateFromAAllFlagsSet() async throws {
+        try await self.testProgram(program: [0xDE, 0x41],
+                                   a: 0x42,
+                                   f: 0x10,
+                                   extraCycles: 2,
+                                   newPC: 0x0002,
+                                   newA: .newValue(0x00),
+                                   newF: .newValue(RegisterBit.subtraction.value | RegisterBit.halfCarry.value | RegisterBit.carry.value | RegisterBit.zero.value))
+    }
+
     mutating func testProgram(program: [UInt8],
                               pc: UInt16 = 0x0000,
                               sp: UInt16 = 0x0000,

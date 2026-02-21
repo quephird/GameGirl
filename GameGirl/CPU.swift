@@ -258,6 +258,10 @@ extension CPU {
             self.addImmediateToA()
         case .adcImmediateToA:
             self.adcImmediateToA()
+        case .subImmediateFromA:
+            self.subImmediateFromA()
+        case .sbcImmediateFromA:
+            self.sbcImmediateFromA()
         }
     }
 
@@ -454,19 +458,31 @@ extension CPU {
     }
 
     mutating func subFromA(from: Opcode.Register8Target) {
-        self.subFromAImpl(from: from, carry: false)
+        let fromValue = self[from]
+
+        self.subFromAImpl(value: fromValue, carry: false)
+    }
+
+    mutating func subImmediateFromA() {
+        let value = self.readProgramByte()
+
+        self.subFromAImpl(value: value, carry: false)
     }
 
     mutating func sbcFromA(from: Opcode.Register8Target) {
-        self.subFromAImpl(from: from, carry: self.f[.carry])
-    }
-
-    mutating func subFromAImpl(from: Opcode.Register8Target, carry: Bool) {
-        // NOTA BENE: We cache the value here once to avoid incurring extra cycles
-        // for when we read from actual memory
         let fromValue = self[from]
 
-        (self.a, self.f[.carry], self.f[.halfCarry]) = self.a.subtractingReportingCarries(fromValue, carry: carry)
+        self.subFromAImpl(value: fromValue, carry: self.f[.carry])
+    }
+
+    mutating func sbcImmediateFromA() {
+        let value = self.readProgramByte()
+
+        self.subFromAImpl(value: value, carry: self.f[.carry])
+    }
+
+    mutating func subFromAImpl(value: UInt8, carry: Bool) {
+        (self.a, self.f[.carry], self.f[.halfCarry]) = self.a.subtractingReportingCarries(value, carry: carry)
         self.f[.zero] = self.a == 0
         self.f[.subtraction] = true
     }
