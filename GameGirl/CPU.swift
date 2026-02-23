@@ -262,6 +262,14 @@ extension CPU {
             self.subImmediateFromA()
         case .sbcImmediateFromA:
             self.sbcImmediateFromA()
+        case .andImmediateWithA:
+            self.andImmediateWithA()
+        case .xorImmediateWithA:
+            self.xorImmediateWithA()
+        case .orImmediateWithA:
+            self.orImmediateWithA()
+        case .cpImmediateWithA:
+            self.cpImmediateWithA()
         }
     }
 
@@ -488,7 +496,17 @@ extension CPU {
     }
 
     mutating func andA(with: Opcode.Register8Target) {
-        self.a &= self[with]
+        self.andAImpl(value: self[with])
+    }
+
+    mutating func andImmediateWithA() {
+        let value = self.readProgramByte()
+
+        self.andAImpl(value: value)
+    }
+
+    mutating func andAImpl(value: UInt8) {
+        self.a &= value
         self.f[.zero] = self.a == 0
         self.f[.subtraction] = false
         self.f[.halfCarry] = true
@@ -496,7 +514,17 @@ extension CPU {
     }
 
     mutating func xorA(with: Opcode.Register8Target) {
-        self.a ^= self[with]
+        self.xorAImpl(value: self[with])
+    }
+
+    mutating func xorImmediateWithA() {
+        let value = self.readProgramByte()
+
+        self.xorAImpl(value: value)
+    }
+
+    mutating func xorAImpl(value: UInt8) {
+        self.a ^= value
         self.f[.zero] = self.a == 0
         self.f[.subtraction] = false
         self.f[.halfCarry] = false
@@ -504,7 +532,17 @@ extension CPU {
     }
 
     mutating func orA(with: Opcode.Register8Target) {
-        self.a |= self[with]
+        self.orAImpl(value: self[with])
+    }
+
+    mutating func orImmediateWithA() {
+        let value = self.readProgramByte()
+
+        self.orAImpl(value: value)
+    }
+
+    mutating func orAImpl(value: UInt8) {
+        self.a |= value
         self.f[.zero] = self.a == 0
         self.f[.subtraction] = false
         self.f[.halfCarry] = false
@@ -512,12 +550,18 @@ extension CPU {
     }
 
     mutating func cpA(with: Opcode.Register8Target) {
-        // NOTA BENE: We cache the value here once to avoid incurring extra cycles
-        // for when we read from actual memory
-        let withValue = self[with]
+        self.cpAImpl(value: self[with])
+    }
 
-        self.f[.zero] = self.a == withValue
+    mutating func cpImmediateWithA() {
+        let value = self.readProgramByte()
+
+        self.cpAImpl(value: value)
+    }
+
+    mutating func cpAImpl(value: UInt8) {
+        self.f[.zero] = self.a == value
         self.f[.subtraction] = true
-        (_, self.f[.carry], self.f[.halfCarry]) = self.a.subtractingReportingCarries(withValue)
+        (_, self.f[.carry], self.f[.halfCarry]) = self.a.subtractingReportingCarries(value)
     }
 }

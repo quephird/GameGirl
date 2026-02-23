@@ -180,9 +180,10 @@ enum Opcode: UInt8 {
     case adcImmediateToA = 0xCE
     case subImmediateFromA = 0xD6
     case sbcImmediateFromA = 0xDE
-//    case andImmediateWithA = 0xE6
-//    case xorImmediateWithA = 0xEE
-//    case orImmediateWithA = 0xF6
+    case andImmediateWithA = 0xE6
+    case xorImmediateWithA = 0xEE
+    case orImmediateWithA = 0xF6
+    case cpImmediateWithA = 0xFE
 }
 
 extension Opcode {
@@ -264,7 +265,7 @@ extension Opcode {
         case .xorAWithB, .xorAWithC, .xorAWithD, .xorAWithE, .xorAWithH, .xorAWithL, .xorAWithHLIndirect, .xorAWithA: 1
         case .orAWithB, .orAWithC, .orAWithD, .orAWithE, .orAWithH, .orAWithL, .orAWithHLIndirect, .orAWithA: 1
         case .cpAWithB, .cpAWithC, .cpAWithD, .cpAWithE, .cpAWithH, .cpAWithL, .cpAWithHLIndirect, .cpAWithA: 1
-        case .addImmediateToA, .adcImmediateToA, .subImmediateFromA, .sbcImmediateFromA: 2
+        case .addImmediateToA, .adcImmediateToA, .subImmediateFromA, .sbcImmediateFromA, .andImmediateWithA, .xorImmediateWithA, .orImmediateWithA, .cpImmediateWithA: 2
         }
     }
 }
@@ -313,7 +314,7 @@ extension Opcode {
         case .orAWithHLIndirect: 2
         case .cpAWithB, .cpAWithC, .cpAWithD, .cpAWithE, .cpAWithH, .cpAWithL, .cpAWithA: 1
         case .cpAWithHLIndirect: 2
-        case .addImmediateToA, .adcImmediateToA, .subImmediateFromA, .sbcImmediateFromA: 2
+        case .addImmediateToA, .adcImmediateToA, .subImmediateFromA, .sbcImmediateFromA, .andImmediateWithA, .xorImmediateWithA, .orImmediateWithA, .cpImmediateWithA: 2
         }
     }
 }

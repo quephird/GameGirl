@@ -1733,6 +1733,16 @@ struct OpcodeTests {
                                    newF: .newValue(RegisterBit.halfCarry.value))
     }
 
+    @Test mutating func andAWithImmediate() async throws {
+        try await self.testProgram(program: [0xE6, 0x5A],
+                                   a: 0xFF,
+                                   f: 0x00,
+                                   extraCycles: 2,
+                                   newPC: 0x0002,
+                                   newA: .newValue(0x5A),
+                                   newF: .newValue(RegisterBit.halfCarry.value))
+    }
+
     @Test mutating func xorAWithB() async throws {
         try await self.testProgram(program: [0xA8],
                                    a: 0xFF,
@@ -1827,6 +1837,16 @@ struct OpcodeTests {
                                    newPC: 0x0001,
                                    newA: .newValue(0x00),
                                    newF: .newValue(RegisterBit.zero.value))
+    }
+
+    @Test mutating func xorAWithImmediate() async throws {
+        try await self.testProgram(program: [0xEE, 0x5A],
+                                   a: 0xA5,
+                                   f: 0x00,
+                                   extraCycles: 2,
+                                   newPC: 0x0002,
+                                   newA: .newValue(0xFF),
+                                   newF: .newValue(0x00))
     }
 
     @Test mutating func orAWithB() async throws {
@@ -1925,6 +1945,16 @@ struct OpcodeTests {
                                    newF: .unchanged)
     }
 
+    @Test mutating func orAWithImmediate() async throws {
+        try await self.testProgram(program: [0xF6, 0x0F],
+                                   a: 0xF0,
+                                   f: 0x00,
+                                   extraCycles: 2,
+                                   newPC: 0x0002,
+                                   newA: .newValue(0xFF),
+                                   newF: .newValue(0x00))
+    }
+
     @Test mutating func cpAWithB() async throws {
         try await self.testProgram(program: [0xB8],
                                    a: 0x42,
@@ -2019,6 +2049,16 @@ struct OpcodeTests {
                                    newPC: 0x0001,
                                    newA: .unchanged,
                                    newF: .newValue(RegisterBit.subtraction.value | RegisterBit.zero.value | RegisterBit.halfCarry.value | RegisterBit.carry.value))
+    }
+
+    @Test mutating func cpAWithImmediate() async throws {
+        try await self.testProgram(program: [0xFE, 0xFF],
+                                   a: 0xFE,
+                                   f: 0x00,
+                                   extraCycles: 2,
+                                   newPC: 0x0002,
+                                   newA: .unchanged,
+                                   newF: .newValue(RegisterBit.subtraction.value))
     }
 
     @Test mutating func addImmediateToANoFlagsSet() async throws {
