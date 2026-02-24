@@ -522,6 +522,77 @@ struct OpcodeTests {
                                    newF: .newValue(0x00))
     }
 
+    @Test mutating func jrImmediate() async throws {
+        try await self.testProgram(program: [0x18, 0x40],
+                                   extraCycles: 3,
+                                   newPC: 0x0042,
+                                   newF: .unchanged)
+    }
+
+    @Test mutating func jrImmediateIfZeroReset() async throws {
+        try await self.testProgram(program: [0x20, 0x40],
+                                   f: 0x00,
+                                   extraCycles: 3,
+                                   newPC: 0x0042,
+                                   newF: .unchanged)
+    }
+
+    @Test mutating func jrImmediateIfZeroResetButZeroActuallySet() async throws {
+        try await self.testProgram(program: [0x20, 0x40],
+                                   f: 0x80,
+                                   extraCycles: 2,
+                                   newPC: 0x0002,
+                                   newF: .unchanged)
+    }
+
+    @Test mutating func jrImmediateIfZeroSet() async throws {
+        try await self.testProgram(program: [0x28, 0x40],
+                                   f: 0x80,
+                                   extraCycles: 3,
+                                   newPC: 0x0042,
+                                   newF: .unchanged)
+    }
+
+    @Test mutating func jrImmediateIfZeroSetButZeroActuallyReset() async throws {
+        try await self.testProgram(program: [0x28, 0x40],
+                                   f: 0x00,
+                                   extraCycles: 2,
+                                   newPC: 0x0002,
+                                   newF: .unchanged)
+    }
+
+    @Test mutating func jrImmediateIfCarryReset() async throws {
+        try await self.testProgram(program: [0x30, 0x40],
+                                   f: 0x00,
+                                   extraCycles: 3,
+                                   newPC: 0x0042,
+                                   newF: .unchanged)
+    }
+
+    @Test mutating func jrImmediateIfCarryResetButCarryActuallySet() async throws {
+        try await self.testProgram(program: [0x30, 0x40],
+                                   f: 0x10,
+                                   extraCycles: 2,
+                                   newPC: 0x0002,
+                                   newF: .unchanged)
+    }
+
+    @Test mutating func jrImmediateIfCarrySet() async throws {
+        try await self.testProgram(program: [0x38, 0x40],
+                                   f: 0x00,
+                                   extraCycles: 2,
+                                   newPC: 0x0002,
+                                   newF: .unchanged)
+    }
+
+    @Test mutating func jrImmediateIfCarrySetButCarryActuallyReset() async throws {
+        try await self.testProgram(program: [0x38, 0x40],
+                                   f: 0x10,
+                                   extraCycles: 3,
+                                   newPC: 0x0042,
+                                   newF: .unchanged)
+    }
+
     @Test mutating func incBC() async throws {
         try await self.testProgram(program: [0x03],
                                    b: 0x12,
