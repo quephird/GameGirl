@@ -279,14 +279,12 @@ extension CPU {
 
     public mutating func executeInstruction() throws {
         let oldCycles = self.cycles
+        let oldF = self.f
+
         let opcode = try self.fetchOpcode()
         try self.execute(opcode: opcode)
 
-        // NOTA BENE: The next line is commented out until I figure out how
-        // to best check the cycle count for instructions for which that figure
-        // is dependent on some other state of the CPU, such as the various JR
-        // opcodes.
-//        assert(self.cycles - oldCycles == opcode.cycles, "The cycle count for this instruction is off: \(opcode)")
+        assert(self.cycles - oldCycles == opcode.cycles(f: oldF), "The cycle count for this instruction is off: \(opcode)")
     }
 
     mutating func nop() {

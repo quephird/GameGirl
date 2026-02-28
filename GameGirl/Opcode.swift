@@ -293,52 +293,60 @@ extension Opcode {
 // is dependent on some other state of the CPU, such as the various JR
 // opcodes.
 //
-//extension Opcode {
-//    var cycles: Int {
-//        switch self {
-//        case .nop: 1
-//        case .ldBCFromImmediate, .ldDEFromImmediate, .ldHLFromImmediate, .ldSPFromImmediate: 3
-//        case .ldBCIndirectFromA, .ldDEIndirectFromA, .ldHLIndirectFromAAndIncrement, .ldHLIndirectFromAAndDecrement: 2
-//        case .incBC, .incDE, .incHL, .incSP: 2
-//        case .incB, .incC, .incD, .incE, .incH, .incL, .incA: 1
-//        case .decB, .decC, .decD, .decE, .decH, .decL, .decA: 1
-//        case .ldBFromImmediate, .ldCFromImmediate, .ldDFromImmediate, .ldEFromImmediate, .ldHFromImmediate, .ldLFromImmediate, .ldAFromImmediate: 2
-//        case .rlca, .rrca, .rla, .rra, .daa, .cpl, .scf, .ccf: 1
-//        case .jrImmediate: 3
-//        case .ldHLIndirectFromImmediate: 3
-//        case .incHLIndirect: 3
-//        case .decHLIndirect: 3
-//        case .ldImmediateIndirectFromSP: 5
-//        case .addBCToHL, .addDEToHL, .addHLToHL, .addSPToHL: 2
-//        case .ldAFromBCIndirect, .ldAFromDEIndirect, .ldAFromHLIndirectAndIncrement, .ldAFromHLIndirectAndDecrement: 2
-//        case .decBC, .decDE, .decHL, .decSP: 2
-//        case .ldBFromB, .ldBFromC, .ldBFromD, .ldBFromE, .ldBFromH, .ldBFromL,
-//                .ldCFromB, .ldCFromC, .ldCFromD, .ldCFromE, .ldCFromH, .ldCFromL,
-//                .ldDFromB, .ldDFromC, .ldDFromD, .ldDFromE, .ldDFromH, .ldDFromL,
-//                .ldEFromB, .ldEFromC, .ldEFromD, .ldEFromE, .ldEFromH, .ldEFromL,
-//                .ldHFromB, .ldHFromC, .ldHFromD, .ldHFromE, .ldHFromH, .ldHFromL,
-//                .ldLFromB, .ldLFromC, .ldLFromD, .ldLFromE, .ldLFromH, .ldLFromL: 1
-//        case .ldBFromHLIndirect, .ldCFromHLIndirect, .ldDFromHLIndirect,
-//                .ldEFromHLIndirect, .ldHFromHLIndirect, .ldLFromHLIndirect: 2
-//        case .ldHLIndirectFromB, .ldHLIndirectFromC, .ldHLIndirectFromD,
-//                .ldHLIndirectFromE, .ldHLIndirectFromH, .ldHLIndirectFromL: 2
-//        case .addBToA, .addCToA, .addDToA, .addEToA, .addHToA, .addLToA, .addAToA: 1
-//        case .addHLIndirectToA: 2
-//        case .adcBToA, .adcCToA, .adcDToA, .adcEToA, .adcHToA, .adcLToA, .adcAToA: 1
-//        case .adcHLIndirectToA: 2
-//        case .subBFromA, .subCFromA, .subDFromA, .subEFromA, .subHFromA, .subLFromA, .subAFromA: 1
-//        case .subHLIndirectFromA: 2
-//        case .sbcBFromA, .sbcCFromA, .sbcDFromA, .sbcEFromA, .sbcHFromA, .sbcLFromA, .sbcAFromA: 1
-//        case .sbcHLIndirectFromA: 2
-//        case .andAWithB, .andAWithC, .andAWithD, .andAWithE, .andAWithH, .andAWithL, .andAWithA: 1
-//        case .andAWithHLIndirect: 2
-//        case .xorAWithB, .xorAWithC, .xorAWithD, .xorAWithE, .xorAWithH, .xorAWithL, .xorAWithA: 1
-//        case .xorAWithHLIndirect: 2
-//        case .orAWithB, .orAWithC, .orAWithD, .orAWithE, .orAWithH, .orAWithL, .orAWithA: 1
-//        case .orAWithHLIndirect: 2
-//        case .cpAWithB, .cpAWithC, .cpAWithD, .cpAWithE, .cpAWithH, .cpAWithL, .cpAWithA: 1
-//        case .cpAWithHLIndirect: 2
-//        case .addImmediateToA, .adcImmediateToA, .subImmediateFromA, .sbcImmediateFromA, .andImmediateWithA, .xorImmediateWithA, .orImmediateWithA, .cpImmediateWithA: 2
-//        }
-//    }
-//}
+extension Opcode {
+    public func cycles(f: Register8) -> Int {
+        switch self {
+        case .nop: 1
+        case .ldBCFromImmediate, .ldDEFromImmediate, .ldHLFromImmediate, .ldSPFromImmediate: 3
+        case .ldBCIndirectFromA, .ldDEIndirectFromA, .ldHLIndirectFromAAndIncrement, .ldHLIndirectFromAAndDecrement: 2
+        case .incBC, .incDE, .incHL, .incSP: 2
+        case .incB, .incC, .incD, .incE, .incH, .incL, .incA: 1
+        case .decB, .decC, .decD, .decE, .decH, .decL, .decA: 1
+        case .ldBFromImmediate, .ldCFromImmediate, .ldDFromImmediate, .ldEFromImmediate, .ldHFromImmediate, .ldLFromImmediate, .ldAFromImmediate: 2
+        case .rlca, .rrca, .rla, .rra, .daa, .cpl, .scf, .ccf: 1
+        case .jrImmediate: 3
+        case .jrImmediateIfZeroReset:
+            !f[.zero] ? 3 : 2
+        case .jrImmediateIfZeroSet:
+            f[.zero] ? 3 : 2
+        case .jrImmediateIfCarryReset:
+            !f[.carry] ? 3 : 2
+        case .jrImmediateIfCarrySet:
+            f[.carry] ? 3 : 2
+        case .ldHLIndirectFromImmediate: 3
+        case .incHLIndirect: 3
+        case .decHLIndirect: 3
+        case .ldImmediateIndirectFromSP: 5
+        case .addBCToHL, .addDEToHL, .addHLToHL, .addSPToHL: 2
+        case .ldAFromBCIndirect, .ldAFromDEIndirect, .ldAFromHLIndirectAndIncrement, .ldAFromHLIndirectAndDecrement: 2
+        case .decBC, .decDE, .decHL, .decSP: 2
+        case .ldBFromB, .ldBFromC, .ldBFromD, .ldBFromE, .ldBFromH, .ldBFromL,
+                .ldCFromB, .ldCFromC, .ldCFromD, .ldCFromE, .ldCFromH, .ldCFromL,
+                .ldDFromB, .ldDFromC, .ldDFromD, .ldDFromE, .ldDFromH, .ldDFromL,
+                .ldEFromB, .ldEFromC, .ldEFromD, .ldEFromE, .ldEFromH, .ldEFromL,
+                .ldHFromB, .ldHFromC, .ldHFromD, .ldHFromE, .ldHFromH, .ldHFromL,
+                .ldLFromB, .ldLFromC, .ldLFromD, .ldLFromE, .ldLFromH, .ldLFromL: 1
+        case .ldBFromHLIndirect, .ldCFromHLIndirect, .ldDFromHLIndirect,
+                .ldEFromHLIndirect, .ldHFromHLIndirect, .ldLFromHLIndirect: 2
+        case .ldHLIndirectFromB, .ldHLIndirectFromC, .ldHLIndirectFromD,
+                .ldHLIndirectFromE, .ldHLIndirectFromH, .ldHLIndirectFromL: 2
+        case .addBToA, .addCToA, .addDToA, .addEToA, .addHToA, .addLToA, .addAToA: 1
+        case .addHLIndirectToA: 2
+        case .adcBToA, .adcCToA, .adcDToA, .adcEToA, .adcHToA, .adcLToA, .adcAToA: 1
+        case .adcHLIndirectToA: 2
+        case .subBFromA, .subCFromA, .subDFromA, .subEFromA, .subHFromA, .subLFromA, .subAFromA: 1
+        case .subHLIndirectFromA: 2
+        case .sbcBFromA, .sbcCFromA, .sbcDFromA, .sbcEFromA, .sbcHFromA, .sbcLFromA, .sbcAFromA: 1
+        case .sbcHLIndirectFromA: 2
+        case .andAWithB, .andAWithC, .andAWithD, .andAWithE, .andAWithH, .andAWithL, .andAWithA: 1
+        case .andAWithHLIndirect: 2
+        case .xorAWithB, .xorAWithC, .xorAWithD, .xorAWithE, .xorAWithH, .xorAWithL, .xorAWithA: 1
+        case .xorAWithHLIndirect: 2
+        case .orAWithB, .orAWithC, .orAWithD, .orAWithE, .orAWithH, .orAWithL, .orAWithA: 1
+        case .orAWithHLIndirect: 2
+        case .cpAWithB, .cpAWithC, .cpAWithD, .cpAWithE, .cpAWithH, .cpAWithL, .cpAWithA: 1
+        case .cpAWithHLIndirect: 2
+        case .addImmediateToA, .adcImmediateToA, .subImmediateFromA, .sbcImmediateFromA, .andImmediateWithA, .xorImmediateWithA, .orImmediateWithA, .cpImmediateWithA: 2
+        }
+    }
+}
