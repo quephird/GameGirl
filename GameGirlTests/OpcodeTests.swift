@@ -10,7 +10,7 @@ import Testing
 
 extension CPU {
     mutating func setProgram(program: [UInt8]) {
-        self.program = program
+        self.memory = program
     }
 }
 
@@ -2345,7 +2345,7 @@ struct OpcodeTests {
                               newH: RegisterChange = .unchanged,
                               newL: RegisterChange = .unchanged,
                               memoryChanges: [UInt16 : UInt8] = [:]) async throws {
-        self.cpu.program = program
+        self.cpu.loadProgram(program: program)
         self.cpu.pc = pc
         self.cpu.sp = sp
         self.cpu.a = a
@@ -2402,11 +2402,11 @@ struct OpcodeTests {
         #expect(self.cpu.h == h.getValue(oldValue: oldCPU.h))
         #expect(self.cpu.l == l.getValue(oldValue: oldCPU.l))
 
-        for address in self.cpu.program.indices {
+        for address in self.cpu.memory.indices {
             if let newValue = memoryChanges[UInt16(address)] {
-                #expect(self.cpu.program[address] == newValue)
+                #expect(self.cpu.memory[address] == newValue)
             } else {
-                #expect(self.cpu.program[address] == oldCPU.program[address])
+                #expect(self.cpu.memory[address] == oldCPU.memory[address])
             }
         }
     }

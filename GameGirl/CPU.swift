@@ -20,7 +20,7 @@ public struct CPU {
 
     public var cycles: Int = 0
 
-    public var program: [UInt8] = []
+    public var memory: [UInt8] = Array(repeating: 0x00, count: 64*1024)
 }
 
 enum CpuError: Error {
@@ -153,6 +153,15 @@ extension CPU {
 }
 
 extension CPU {
+    mutating func loadProgram(program: [UInt8]) {
+        // NOTA BENE: We access memory directly here in order to
+        // initially load the program, and so do not need to increment
+        // cycles as we would while _running_ a program.
+        for (index, byte) in program.enumerated() {
+            self.memory[index] = byte
+        }
+    }
+
     mutating func readProgramByte() -> UInt8 {
         // NOTA BENE: Perhaps later we can do some bounds checking
         let byte = self.readMemory(address: self.pc)
@@ -163,19 +172,41 @@ extension CPU {
     mutating func readProgramWord() -> UInt16 {
         let lowByte = self.readProgramByte()
         let highByte = self.readProgramByte()
-        return UInt16(highByte) << 8 | UInt16(lowByte)
+        return UInt16(highByte: highByte, lowByte: lowByte)
     }
 
     // ACHTUNG!!!!! This is a temporary measure for now until
     // we have a more robust understanding of memory and the bus.
     mutating func readMemory(address: UInt16) -> UInt8 {
         self.cycles += 1
-        return self.program[Int(address)]
+        return self.memory[Int(address)]
     }
 
     mutating func writeMemory(address: UInt16, byte: UInt8) {
-        self.program[Int(address)] = byte
+        self.memory[Int(address)] = byte
         self.cycles += 1
+    }
+
+    mutating func popStackByte() -> UInt8 {
+        let byte = self.readMemory(address: self.sp)
+        self.sp -= 1
+        return byte
+    }
+
+    mutating func popStack() -> UInt16 {
+        let lowByte = self.popStackByte()
+        let highByte = self.popStackByte()
+        return UInt16(highByte: highByte, lowByte: lowByte)
+    }
+
+    mutating func pushStackByte(byte: UInt8) {
+        self.writeMemory(address: self.sp, byte: byte)
+        self.sp += 1
+    }
+
+    mutating func pushStack(word: UInt16) {
+        self.pushStackByte(byte: word.high)
+        self.pushStackByte(byte: word.low)
     }
 
     mutating func fetchOpcode() throws -> Opcode {
