@@ -15,7 +15,7 @@ public struct CPU {
     public var h: Register8 = 0x00
     public var l: Register8 = 0x00
 
-    public var sp: Register16 = 0x0000
+    public var sp: Register16 = 0xFFFF
     public var pc: Register16 = 0x0000
 
     public var cycles: Int = 0
@@ -154,11 +154,21 @@ extension CPU {
 
 extension CPU {
     mutating func loadProgram(program: [UInt8]) {
-        // NOTA BENE: We access memory directly here in order to
-        // initially load the program, and so do not need to increment
-        // cycles as we would while _running_ a program.
+        // NOTA BENE: We access memory directly here in order to initially load
+        // the program in the context of initializing the CPU while running a unit test,
+        // and so do not need to increment cycles as we would while executing a program.
         for (index, byte) in program.enumerated() {
             self.memory[index] = byte
+        }
+    }
+
+    mutating func loadStack(stack: [UInt8]) {
+        // NOTA BENE: We access memory directly here in order to initially load
+        // the stack in the context of initializing the CPU while running a unit test,
+        // and so do not need to increment cycles as we would while actually
+        // popping and/or pushing during executing a program.
+        for (index, byte) in stack.enumerated() {
+            self.memory[0xFFFE - index] = byte
         }
     }
 
@@ -187,9 +197,13 @@ extension CPU {
         self.cycles += 1
     }
 
+    // NOTA BENE: The GameBoy is little-endian and so push and pop
+    // operations behave as described in the answers in this thread:
+    //
+    //    https://www.reddit.com/r/EmuDev/comments/7an96f/gameboy_questions_about_handling_16bit_readwrite/
     mutating func popStackByte() -> UInt8 {
         let byte = self.readMemory(address: self.sp)
-        self.sp -= 1
+        self.sp += 1
         return byte
     }
 
@@ -200,8 +214,8 @@ extension CPU {
     }
 
     mutating func pushStackByte(byte: UInt8) {
+        self.sp -= 1
         self.writeMemory(address: self.sp, byte: byte)
-        self.sp += 1
     }
 
     mutating func pushStack(word: UInt16) {
@@ -305,6 +319,10 @@ extension CPU {
             self.orImmediateWithA()
         case .cpImmediateWithA:
             self.cpImmediateWithA()
+        case .retIfZeroReset, .retIfZeroSet, .retIfCarryReset, .retIfCarrySet:
+            self.ret(condition: Opcode.JumpCondition(opcode: opcode)!)
+        case .ret:
+            self.ret()
         }
     }
 
@@ -486,7 +504,7 @@ extension CPU {
             self.pc &+= 1
         }
 
-        // NOTA BENE: This set of instruction incurs an extra cycle
+        // NOTA BENE: This set of instructions incurs an extra cycle
         self.cycles += 1
     }
 
@@ -633,5 +651,43 @@ extension CPU {
         self.f[.zero] = self.a == value
         self.f[.subtraction] = true
         (_, self.f[.carry], self.f[.halfCarry]) = self.a.subtractingReportingCarries(value)
+    }
+
+    mutating func ret(condition: Opcode.JumpCondition) {
+        let conditionSatisfied: Bool = switch condition {
+        case .carryReset:
+            !self.f[.carry]
+        case .carrySet:
+            self.f[.carry]
+        case .zeroReset:
+            !self.f[.zero]
+        case .zeroSet:
+            self.f[.zero]
+        }
+
+        // NOTA BENE: The flag check above incurs an extra cycle;
+        // see the following page for details:
+        //
+        //    https://gist.github.com/SonoSooS/c0055300670d678b5ae8433e20bea595#ret-cc
+        self.cycles += 1
+
+        self.retImpl(conditionSatisfied: conditionSatisfied)
+    }
+
+    mutating func ret() {
+        self.retImpl(conditionSatisfied: true)
+    }
+
+    mutating func retImpl(conditionSatisfied: Bool) {
+        if conditionSatisfied {
+            let address = self.popStack()
+            self.pc = address
+
+            // NOTA BENE: The setting of the program counter incurs an extra cycle;
+            // see the following page for details:
+            //
+            //    https://gist.github.com/SonoSooS/c0055300670d678b5ae8433e20bea595#ret-cc
+            self.cycles += 1
+        }
     }
 }

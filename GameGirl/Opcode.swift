@@ -181,9 +181,14 @@ enum Opcode: UInt8 {
     case cpAWithL = 0xBD
     case cpAWithHLIndirect = 0xBE
     case cpAWithA = 0xBF
+    case retIfZeroReset = 0xC0
     case addImmediateToA = 0xC6
+    case retIfZeroSet = 0xC8
+    case ret = 0xC9
     case adcImmediateToA = 0xCE
+    case retIfCarryReset = 0xD0
     case subImmediateFromA = 0xD6
+    case retIfCarrySet = 0xD8
     case sbcImmediateFromA = 0xDE
     case andImmediateWithA = 0xE6
     case xorImmediateWithA = 0xEE
@@ -284,6 +289,8 @@ extension Opcode {
         case .orAWithB, .orAWithC, .orAWithD, .orAWithE, .orAWithH, .orAWithL, .orAWithHLIndirect, .orAWithA: 1
         case .cpAWithB, .cpAWithC, .cpAWithD, .cpAWithE, .cpAWithH, .cpAWithL, .cpAWithHLIndirect, .cpAWithA: 1
         case .addImmediateToA, .adcImmediateToA, .subImmediateFromA, .sbcImmediateFromA, .andImmediateWithA, .xorImmediateWithA, .orImmediateWithA, .cpImmediateWithA: 2
+        case .retIfZeroReset, .retIfZeroSet, .retIfCarryReset, .retIfCarrySet: 1
+        case .ret: 1
         }
     }
 }
@@ -347,6 +354,15 @@ extension Opcode {
         case .cpAWithB, .cpAWithC, .cpAWithD, .cpAWithE, .cpAWithH, .cpAWithL, .cpAWithA: 1
         case .cpAWithHLIndirect: 2
         case .addImmediateToA, .adcImmediateToA, .subImmediateFromA, .sbcImmediateFromA, .andImmediateWithA, .xorImmediateWithA, .orImmediateWithA, .cpImmediateWithA: 2
+        case .retIfZeroReset:
+            !f[.zero] ? 5 : 2
+        case .retIfZeroSet:
+            f[.zero] ? 5 : 2
+        case .retIfCarryReset:
+            !f[.carry] ? 5 : 2
+        case .retIfCarrySet:
+            f[.carry] ? 5 : 2
+        case .ret: 4
         }
     }
 }

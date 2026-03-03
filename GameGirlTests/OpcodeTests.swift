@@ -2322,9 +2322,108 @@ struct OpcodeTests {
                                    newF: .newValue(RegisterBit.subtraction.value | RegisterBit.halfCarry.value | RegisterBit.carry.value | RegisterBit.zero.value))
     }
 
+    @Test mutating func retIfZeroReset() async throws {
+        try await self.testProgram(program: [0xC0],
+                                   stack: [0x12, 0x34],
+                                   sp: 0xFFFD,
+                                   f: 0x00,
+                                   extraCycles: 5,
+                                   newPC: 0x1234,
+                                   newSP: .newValue(0xFFFF),
+                                   newF: .unchanged)
+    }
+
+    @Test mutating func retIfZeroResetButZeroActuallySet() async throws {
+        try await self.testProgram(program: [0xC0],
+                                   stack: [0x12, 0x34],
+                                   sp: 0xFFFD,
+                                   f: 0x80,
+                                   extraCycles: 2,
+                                   newPC: 0x0001,
+                                   newSP: .unchanged,
+                                   newF: .unchanged)
+    }
+
+    @Test mutating func retIfZeroSet() async throws {
+        try await self.testProgram(program: [0xC8],
+                                   stack: [0x12, 0x34],
+                                   sp: 0xFFFD,
+                                   f: 0x80,
+                                   extraCycles: 5,
+                                   newPC: 0x1234,
+                                   newSP: .newValue(0xFFFF),
+                                   newF: .unchanged)
+    }
+
+    @Test mutating func retIfZeroSetButZeroActuallyReset() async throws {
+        try await self.testProgram(program: [0xC8],
+                                   stack: [0x12, 0x34],
+                                   sp: 0xFFFD,
+                                   f: 0x00,
+                                   extraCycles: 2,
+                                   newPC: 0x0001,
+                                   newSP: .unchanged,
+                                   newF: .unchanged)
+    }
+
+    @Test mutating func retIfCarryReset() async throws {
+        try await self.testProgram(program: [0xD0],
+                                   stack: [0x12, 0x34],
+                                   sp: 0xFFFD,
+                                   f: 0x00,
+                                   extraCycles: 5,
+                                   newPC: 0x1234,
+                                   newSP: .newValue(0xFFFF),
+                                   newF: .unchanged)
+    }
+
+    @Test mutating func retIfCarryResetButCarryActuallySet() async throws {
+        try await self.testProgram(program: [0xD0],
+                                   stack: [0x12, 0x34],
+                                   sp: 0xFFFD,
+                                   f: 0x10,
+                                   extraCycles: 2,
+                                   newPC: 0x0001,
+                                   newSP: .unchanged,
+                                   newF: .unchanged)
+    }
+
+    @Test mutating func retIfCarrySet() async throws {
+        try await self.testProgram(program: [0xD8],
+                                   stack: [0x12, 0x34],
+                                   sp: 0xFFFD,
+                                   f: 0x10,
+                                   extraCycles: 5,
+                                   newPC: 0x1234,
+                                   newSP: .newValue(0xFFFF),
+                                   newF: .unchanged)
+    }
+
+    @Test mutating func retIfCarrySetButCarryActuallyReset() async throws {
+        try await self.testProgram(program: [0xD8],
+                                   stack: [0x12, 0x34],
+                                   sp: 0xFFFD,
+                                   f: 0x00,
+                                   extraCycles: 2,
+                                   newPC: 0x0001,
+                                   newSP: .unchanged,
+                                   newF: .unchanged)
+    }
+
+    @Test mutating func ret() async throws {
+        try await self.testProgram(program: [0xC9],
+                                   stack: [0x12, 0x34],
+                                   sp: 0xFFFD,
+                                   extraCycles: 4,
+                                   newPC: 0x1234,
+                                   newSP: .newValue(0xFFFF),
+                                   newF: .unchanged)
+    }
+
     mutating func testProgram(program: [UInt8],
+                              stack: [UInt8] = [],
                               pc: UInt16 = 0x0000,
-                              sp: UInt16 = 0x0000,
+                              sp: UInt16 = 0xFFFF,
                               a: UInt8 = 0x00,
                               f: UInt8 = 0x00,
                               b: UInt8 = 0x00,
@@ -2346,6 +2445,7 @@ struct OpcodeTests {
                               newL: RegisterChange = .unchanged,
                               memoryChanges: [UInt16 : UInt8] = [:]) async throws {
         self.cpu.loadProgram(program: program)
+        self.cpu.loadStack(stack: stack)
         self.cpu.pc = pc
         self.cpu.sp = sp
         self.cpu.a = a
