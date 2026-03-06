@@ -38,6 +38,18 @@ enum RegisterPairChange {
     }
 }
 
+enum FlagChange {
+    case unchanged
+    case newValue(Bool)
+
+    public func getValue(oldValue: Bool) -> Bool {
+        switch self {
+        case .unchanged: return oldValue
+        case .newValue(let newValue): return newValue
+        }
+    }
+}
+
 struct OpcodeTests {
     var cpu = CPU()
 
@@ -2420,6 +2432,18 @@ struct OpcodeTests {
                                    newF: .unchanged)
     }
 
+    @Test mutating func retI() async throws {
+        try await self.testProgram(program: [0xD9],
+                                   stack: [0x12, 0x34],
+                                   sp: 0xFFFD,
+                                   interruptsEnabled: false,
+                                   extraCycles: 4,
+                                   newPC: 0x1234,
+                                   newSP: .newValue(0xFFFF),
+                                   newF: .unchanged,
+                                   newInterruptsEnabled: .newValue(true))
+    }
+
     mutating func testProgram(program: [UInt8],
                               stack: [UInt8] = [],
                               pc: UInt16 = 0x0000,
@@ -2432,6 +2456,7 @@ struct OpcodeTests {
                               e: UInt8 = 0x00,
                               h: UInt8 = 0x00,
                               l: UInt8 = 0x00,
+                              interruptsEnabled: Bool = false,
                               extraCycles: Int,
                               newPC: UInt16,
                               newSP: RegisterPairChange = .unchanged,
@@ -2443,7 +2468,8 @@ struct OpcodeTests {
                               newE: RegisterChange = .unchanged,
                               newH: RegisterChange = .unchanged,
                               newL: RegisterChange = .unchanged,
-                              memoryChanges: [UInt16 : UInt8] = [:]) async throws {
+                              memoryChanges: [UInt16 : UInt8] = [:],
+                              newInterruptsEnabled: FlagChange = .unchanged) async throws {
         self.cpu.loadProgram(program: program)
         self.cpu.loadStack(stack: stack)
         self.cpu.pc = pc
@@ -2456,6 +2482,7 @@ struct OpcodeTests {
         self.cpu.e = e
         self.cpu.h = h
         self.cpu.l = l
+        self.cpu.interruptsEnabled = interruptsEnabled
 
         let oldCPU = self.cpu
         try self.cpu.executeInstruction()
@@ -2472,7 +2499,8 @@ struct OpcodeTests {
                  e: newE,
                  h: newH,
                  l: newL,
-                 memoryChanges: memoryChanges)
+                 memoryChanges: memoryChanges,
+                 newInterruptsEnabled: newInterruptsEnabled)
     }
 
     func checkCPU(
@@ -2488,7 +2516,8 @@ struct OpcodeTests {
         e: RegisterChange = .unchanged,
         h: RegisterChange = .unchanged,
         l: RegisterChange = .unchanged,
-        memoryChanges: [UInt16 : UInt8] = [:]
+        memoryChanges: [UInt16 : UInt8] = [:],
+        newInterruptsEnabled: FlagChange = .unchanged
     ) {
         #expect(self.cpu.cycles == oldCPU.cycles + extraCycles)
         #expect(self.cpu.pc == pc)
@@ -2501,6 +2530,8 @@ struct OpcodeTests {
         #expect(self.cpu.e == e.getValue(oldValue: oldCPU.e))
         #expect(self.cpu.h == h.getValue(oldValue: oldCPU.h))
         #expect(self.cpu.l == l.getValue(oldValue: oldCPU.l))
+
+        #expect(self.cpu.interruptsEnabled == newInterruptsEnabled.getValue(oldValue: oldCPU.interruptsEnabled))
 
         for address in self.cpu.memory.indices {
             if let newValue = memoryChanges[UInt16(address)] {

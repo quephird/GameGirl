@@ -21,6 +21,8 @@ public struct CPU {
     public var cycles: Int = 0
 
     public var memory: [UInt8] = Array(repeating: 0x00, count: 64*1024)
+
+    public var interruptsEnabled: Bool = false
 }
 
 enum CpuError: Error {
@@ -323,6 +325,8 @@ extension CPU {
             self.ret(condition: Opcode.JumpCondition(opcode: opcode)!)
         case .ret:
             self.ret()
+        case .retI:
+            self.retI()
         }
     }
 
@@ -678,10 +682,15 @@ extension CPU {
         self.retImpl(conditionSatisfied: true)
     }
 
-    mutating func retImpl(conditionSatisfied: Bool) {
+    mutating func retI() {
+        self.retImpl(conditionSatisfied: true, interruptsEnabled: true)
+    }
+
+    mutating func retImpl(conditionSatisfied: Bool, interruptsEnabled: Bool = false) {
         if conditionSatisfied {
             let address = self.popStack()
             self.pc = address
+            self.interruptsEnabled = interruptsEnabled
 
             // NOTA BENE: The setting of the program counter incurs an extra cycle;
             // see the following page for details:
