@@ -182,14 +182,19 @@ enum Opcode: UInt8 {
     case cpAWithHLIndirect = 0xBE
     case cpAWithA = 0xBF
     case retIfZeroReset = 0xC0
+    case jpImmediateIfZeroReset = 0xC2
+    case jpImmediate = 0xC3
     case addImmediateToA = 0xC6
     case retIfZeroSet = 0xC8
     case ret = 0xC9
+    case jpImmediateIfZeroSet = 0xCA
     case adcImmediateToA = 0xCE
     case retIfCarryReset = 0xD0
+    case jpImmediateIfCarryReset = 0xD2
     case subImmediateFromA = 0xD6
     case retIfCarrySet = 0xD8
     case retI = 0xD9
+    case jpImmediateIfCarrySet = 0xDA
     case sbcImmediateFromA = 0xDE
     case andImmediateWithA = 0xE6
     case xorImmediateWithA = 0xEE
@@ -292,6 +297,8 @@ extension Opcode {
         case .addImmediateToA, .adcImmediateToA, .subImmediateFromA, .sbcImmediateFromA, .andImmediateWithA, .xorImmediateWithA, .orImmediateWithA, .cpImmediateWithA: 2
         case .retIfZeroReset, .retIfZeroSet, .retIfCarryReset, .retIfCarrySet: 1
         case .ret, .retI: 1
+        case .jpImmediateIfZeroReset, .jpImmediateIfZeroSet, .jpImmediateIfCarryReset, .jpImmediateIfCarrySet: 3
+        case .jpImmediate: 3
         }
     }
 }
@@ -364,6 +371,15 @@ extension Opcode {
         case .retIfCarrySet:
             f[.carry] ? 5 : 2
         case .ret, .retI: 4
+        case .jpImmediateIfZeroReset:
+            !f[.zero] ? 4 : 3
+        case .jpImmediateIfZeroSet:
+            f[.zero] ? 4 : 3
+        case .jpImmediateIfCarryReset:
+            !f[.carry] ? 4 : 3
+        case .jpImmediateIfCarrySet:
+            f[.carry] ? 4 : 3
+        case .jpImmediate: 4
         }
     }
 }

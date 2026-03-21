@@ -327,6 +327,10 @@ extension CPU {
             self.ret()
         case .retI:
             self.retI()
+        case .jpImmediateIfZeroReset, .jpImmediateIfZeroSet, .jpImmediateIfCarryReset, .jpImmediateIfCarrySet:
+            self.jpImmediate(condition: Opcode.JumpCondition(opcode: opcode)!)
+        case .jpImmediate:
+            self.jpImmediate()
         }
     }
 
@@ -510,6 +514,40 @@ extension CPU {
 
         // NOTA BENE: This set of instructions incurs an extra cycle
         self.cycles += 1
+    }
+
+    mutating func jpImmediate(condition: Opcode.JumpCondition) {
+        let conditionSatisfied: Bool = switch condition {
+        case .carryReset:
+            !self.f[.carry]
+        case .carrySet:
+            self.f[.carry]
+        case .zeroReset:
+            !self.f[.zero]
+        case .zeroSet:
+            self.f[.zero]
+        }
+
+        self.jpImmediateImpl(conditionSatisfied: conditionSatisfied)
+    }
+
+    mutating func jpImmediate() {
+        self.jpImmediateImpl(conditionSatisfied: true)
+    }
+
+    mutating func jpImmediateImpl(conditionSatisfied: Bool) {
+        // ACHTUNG!!! The CPU actually reads the next two bytes
+        // even if the condition is false, and thus regardless
+        // consumes two more cycles! :O :O :O
+        //
+        //    https://gekkio.fi/files/gb-docs/gbctr.pdf
+        let address = self.readProgramWord()
+
+        if conditionSatisfied {
+            self.pc = address
+
+            self.cycles += 1
+        }
     }
 
     mutating func addToHL(from: Opcode.Register16Target) {
