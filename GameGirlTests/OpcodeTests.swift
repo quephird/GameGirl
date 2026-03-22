@@ -676,6 +676,16 @@ struct OpcodeTests {
                                    newF: .unchanged)
     }
 
+    @Test mutating func jpHL() async throws {
+        try await self.testProgram(program: [0xE9],
+                                   f: 0x10,
+                                   h: 0x12,
+                                   l: 0x34,
+                                   extraCycles: 1,
+                                   newPC: 0x1234,
+                                   newF: .unchanged)
+    }
+
     @Test mutating func incBC() async throws {
         try await self.testProgram(program: [0x03],
                                    b: 0x12,

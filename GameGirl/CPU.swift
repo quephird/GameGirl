@@ -331,6 +331,8 @@ extension CPU {
             self.jpImmediate(condition: Opcode.JumpCondition(opcode: opcode)!)
         case .jpImmediate:
             self.jpImmediate()
+        case .jpHL:
+            self.jpHL()
         }
     }
 
@@ -548,6 +550,12 @@ extension CPU {
 
             self.cycles += 1
         }
+    }
+
+    mutating func jpHL() {
+        let address = self.hl
+
+        self.pc = address
     }
 
     mutating func addToHL(from: Opcode.Register16Target) {

@@ -197,6 +197,7 @@ enum Opcode: UInt8 {
     case jpImmediateIfCarrySet = 0xDA
     case sbcImmediateFromA = 0xDE
     case andImmediateWithA = 0xE6
+    case jpHL = 0xE9
     case xorImmediateWithA = 0xEE
     case orImmediateWithA = 0xF6
     case cpImmediateWithA = 0xFE
@@ -299,6 +300,7 @@ extension Opcode {
         case .ret, .retI: 1
         case .jpImmediateIfZeroReset, .jpImmediateIfZeroSet, .jpImmediateIfCarryReset, .jpImmediateIfCarrySet: 3
         case .jpImmediate: 3
+        case .jpHL: 1
         }
     }
 }
@@ -380,6 +382,7 @@ extension Opcode {
         case .jpImmediateIfCarrySet:
             f[.carry] ? 4 : 3
         case .jpImmediate: 4
+        case .jpHL: 1
         }
     }
 }
