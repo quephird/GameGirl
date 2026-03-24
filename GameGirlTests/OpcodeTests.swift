@@ -686,6 +686,103 @@ struct OpcodeTests {
                                    newF: .unchanged)
     }
 
+    @Test mutating func callImmediateIfZeroReset() async throws {
+        try await self.testProgram(program: [0xC4, 0x34, 0x12],
+                                   f: 0x00,
+                                   extraCycles: 6,
+                                   newPC: 0x1234,
+                                   newSP: .newValue(0xFFFD),
+                                   newF: .unchanged,
+                                   memoryChanges: [
+                                       0xFFFD: 0x03,
+                                       0xFFFE: 0x00,
+                                   ])
+    }
+
+    @Test mutating func callImmediateIfZeroResetButZeroActuallySet() async throws {
+        try await self.testProgram(program: [0xC4, 0x34, 0x12],
+                                   f: 0x80,
+                                   extraCycles: 3,
+                                   newPC: 0x1234,
+                                   newSP: .newValue(0xFFFD),
+                                   newF: .unchanged)
+    }
+
+    @Test mutating func callImmediateIfZeroSet() async throws {
+        try await self.testProgram(program: [0xCC, 0x34, 0x12],
+                                   f: 0x80,
+                                   extraCycles: 6,
+                                   newPC: 0x1234,
+                                   newSP: .newValue(0xFFFD),
+                                   newF: .unchanged,
+                                   memoryChanges: [
+                                       0xFFFD: 0x03,
+                                       0xFFFE: 0x00,
+                                   ])
+    }
+
+    @Test mutating func callImmediateIfZeroSetButZeroActuallyReset() async throws {
+        try await self.testProgram(program: [0xCC, 0x34, 0x12],
+                                   f: 0x00,
+                                   extraCycles: 3,
+                                   newPC: 0x0003,
+                                   newF: .unchanged)
+    }
+
+    @Test mutating func callImmediateIfCarryReset() async throws {
+        try await self.testProgram(program: [0xD4, 0x34, 0x12],
+                                   f: 0x00,
+                                   extraCycles: 6,
+                                   newPC: 0x1234,
+                                   newSP: .newValue(0xFFFD),
+                                   newF: .unchanged,
+                                   memoryChanges: [
+                                       0xFFFD: 0x03,
+                                       0xFFFE: 0x00,
+                                   ])
+    }
+
+    @Test mutating func callImmediateIfCarryResetButCarryActuallySet() async throws {
+        try await self.testProgram(program: [0xD4, 0x34, 0x12],
+                                   f: 0x10,
+                                   extraCycles: 3,
+                                   newPC: 0x0003,
+                                   newF: .unchanged)
+    }
+
+    @Test mutating func callImmediateIfCarrySet() async throws {
+        try await self.testProgram(program: [0xDC, 0x34, 0x12],
+                                   f: 0x10,
+                                   extraCycles: 6,
+                                   newPC: 0x1234,
+                                   newSP: .newValue(0xFFFD),
+                                   newF: .unchanged,
+                                   memoryChanges: [
+                                       0xFFFD: 0x03,
+                                       0xFFFE: 0x00,
+                                   ])
+    }
+
+    @Test mutating func callImmediateIfCarrySetButCarryActuallyReset() async throws {
+        try await self.testProgram(program: [0xDC, 0x34, 0x12],
+                                   f: 0x00,
+                                   extraCycles: 3,
+                                   newPC: 0x0003,
+                                   newF: .unchanged)
+    }
+
+    @Test mutating func callImmediate() async throws {
+        try await self.testProgram(program: [0xCD, 0x34, 0x12],
+                                   extraCycles: 6,
+                                   newPC: 0x1234,
+                                   newSP: .newValue(0xFFFD),
+                                   newF: .unchanged,
+                                   memoryChanges: [
+                                       0xFFFD: 0x03,
+                                       0xFFFE: 0x00,
+                                   ])
+    }
+
     @Test mutating func incBC() async throws {
         try await self.testProgram(program: [0x03],
                                    b: 0x12,
@@ -2614,6 +2711,8 @@ struct OpcodeTests {
 
         #expect(self.cpu.interruptsEnabled == newInterruptsEnabled.getValue(oldValue: oldCPU.interruptsEnabled))
 
+        // NOTA BENE: We check for changes to the stack here as well as it
+        // is embedded in the GameBoy's memory.
         for address in self.cpu.memory.indices {
             if let newValue = memoryChanges[UInt16(address)] {
                 #expect(self.cpu.memory[address] == newValue)

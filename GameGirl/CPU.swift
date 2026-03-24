@@ -333,6 +333,10 @@ extension CPU {
             self.jpImmediate()
         case .jpHL:
             self.jpHL()
+        case .callImmediateIfZeroReset, .callImmediateIfZeroSet, .callImmediateIfCarryReset, .callImmediateIfCarrySet:
+            self.callImmediate(condition: Opcode.JumpCondition(opcode: opcode)!)
+        case .callImmediate:
+            self.callImmediate()
         }
     }
 
@@ -486,12 +490,8 @@ extension CPU {
         self[target] = newValue
     }
 
-    mutating func jrImmediate() {
-        self.jrImmediateImpl(conditionSatisfied: true)
-    }
-
-    mutating func jrImmediate(condition: Opcode.JumpCondition) {
-        let conditionSatisfied: Bool = switch condition {
+    mutating func isSatisfied(condition: Opcode.JumpCondition) -> Bool {
+        switch condition {
         case .carryReset:
             !self.f[.carry]
         case .carrySet:
@@ -501,6 +501,14 @@ extension CPU {
         case .zeroSet:
             self.f[.zero]
         }
+    }
+
+    mutating func jrImmediate() {
+        self.jrImmediateImpl(conditionSatisfied: true)
+    }
+
+    mutating func jrImmediate(condition: Opcode.JumpCondition) {
+        let conditionSatisfied = isSatisfied(condition: condition)
 
         self.jrImmediateImpl(conditionSatisfied: conditionSatisfied)
     }
@@ -519,16 +527,7 @@ extension CPU {
     }
 
     mutating func jpImmediate(condition: Opcode.JumpCondition) {
-        let conditionSatisfied: Bool = switch condition {
-        case .carryReset:
-            !self.f[.carry]
-        case .carrySet:
-            self.f[.carry]
-        case .zeroReset:
-            !self.f[.zero]
-        case .zeroSet:
-            self.f[.zero]
-        }
+        let conditionSatisfied = isSatisfied(condition: condition)
 
         self.jpImmediateImpl(conditionSatisfied: conditionSatisfied)
     }
@@ -556,6 +555,47 @@ extension CPU {
         let address = self.hl
 
         self.pc = address
+    }
+
+    mutating func callImmediate(condition: Opcode.JumpCondition) {
+        let conditionSatisfied = isSatisfied(condition: condition)
+
+        self.callImmediateImpl(conditionSatisfied: conditionSatisfied)
+    }
+
+    mutating func callImmediate() {
+//        let address = self.readProgramWord()
+//
+//        self.pushStack(word: self.pc)
+//        self.pc = address
+//
+//        // NOTA BENE: The setting of the program counter incurs an extra cycle;
+//        // see the following page for details:
+//        //
+//        //    https://gist.github.com/SonoSooS/c0055300670d678b5ae8433e20bea595#call-a16
+//        self.cycles += 1
+
+        self.callImmediateImpl(conditionSatisfied: true)
+    }
+
+    mutating func callImmediateImpl(conditionSatisfied: Bool) {
+        // ACHTUNG!!! The CPU actually reads the next two bytes
+        // even if the condition is false, and thus regardless
+        // consumes two more cycles! :O :O :O
+        //
+        //    https://gekkio.fi/files/gb-docs/gbctr.pdf
+        let address = self.readProgramWord()
+
+        if conditionSatisfied {
+            self.pushStack(word: self.pc)
+            self.pc = address
+
+            // NOTA BENE: The setting of the program counter incurs an extra cycle;
+            // see the following page for details:
+            //
+            //    https://gist.github.com/SonoSooS/c0055300670d678b5ae8433e20bea595#call-a16
+            self.cycles += 1
+        }
     }
 
     mutating func addToHL(from: Opcode.Register16Target) {
