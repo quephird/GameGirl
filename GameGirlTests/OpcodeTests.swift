@@ -783,6 +783,120 @@ struct OpcodeTests {
                                    ])
     }
 
+    @Test mutating func popBC() async throws {
+        try await self.testProgram(program: [0xC1],
+                                   stack: [0x12, 0x34],
+                                   sp: 0xFFFD,
+                                   extraCycles: 3,
+                                   newPC: 0x0001,
+                                   newSP: .newValue(0xFFFF),
+                                   newF: .unchanged,
+                                   newB: .newValue(0x12),
+                                   newC: .newValue(0x34),
+                                   memoryChanges: [:])
+    }
+
+    @Test mutating func popDE() async throws {
+        try await self.testProgram(program: [0xD1],
+                                   stack: [0x12, 0x34],
+                                   sp: 0xFFFD,
+                                   extraCycles: 3,
+                                   newPC: 0x0001,
+                                   newSP: .newValue(0xFFFF),
+                                   newF: .unchanged,
+                                   newD: .newValue(0x12),
+                                   newE: .newValue(0x34),
+                                   memoryChanges: [:])
+    }
+
+    @Test mutating func popHL() async throws {
+        try await self.testProgram(program: [0xE1],
+                                   stack: [0x12, 0x34],
+                                   sp: 0xFFFD,
+                                   extraCycles: 3,
+                                   newPC: 0x0001,
+                                   newSP: .newValue(0xFFFF),
+                                   newF: .unchanged,
+                                   newH: .newValue(0x12),
+                                   newL: .newValue(0x34),
+                                   memoryChanges: [:])
+    }
+
+    @Test mutating func popAF() async throws {
+        try await self.testProgram(program: [0xF1],
+                                   stack: [0x12, 0x34],
+                                   sp: 0xFFFD,
+                                   extraCycles: 3,
+                                   newPC: 0x0001,
+                                   newSP: .newValue(0xFFFF),
+                                   newA: .newValue(0x12),
+                                   newF: .newValue(0x34),
+                                   memoryChanges: [:])
+    }
+
+    @Test mutating func pushBC() async throws {
+        try await self.testProgram(program: [0xC5],
+                                   b: 0x12,
+                                   c: 0x34,
+                                   extraCycles: 4,
+                                   newPC: 0x0001,
+                                   newSP: .newValue(0xFFFD),
+                                   newF: .unchanged,
+                                   newB: .unchanged,
+                                   newC: .unchanged,
+                                   memoryChanges: [
+                                       0xFFFD: 0x34,
+                                       0xFFFE: 0x12,
+                                   ])
+    }
+
+    @Test mutating func pushDE() async throws {
+        try await self.testProgram(program: [0xD5],
+                                   d: 0x12,
+                                   e: 0x34,
+                                   extraCycles: 4,
+                                   newPC: 0x0001,
+                                   newSP: .newValue(0xFFFD),
+                                   newF: .unchanged,
+                                   newD: .unchanged,
+                                   newE: .unchanged,
+                                   memoryChanges: [
+                                       0xFFFD: 0x34,
+                                       0xFFFE: 0x12,
+                                   ])
+    }
+
+    @Test mutating func pushHL() async throws {
+        try await self.testProgram(program: [0xE5],
+                                   h: 0x12,
+                                   l: 0x34,
+                                   extraCycles: 4,
+                                   newPC: 0x0001,
+                                   newSP: .newValue(0xFFFD),
+                                   newF: .unchanged,
+                                   newH: .unchanged,
+                                   newL: .unchanged,
+                                   memoryChanges: [
+                                       0xFFFD: 0x34,
+                                       0xFFFE: 0x12,
+                                   ])
+    }
+
+    @Test mutating func pushAF() async throws {
+        try await self.testProgram(program: [0xF5],
+                                   a: 0x12,
+                                   f: 0x34,
+                                   extraCycles: 4,
+                                   newPC: 0x0001,
+                                   newSP: .newValue(0xFFFD),
+                                   newA: .unchanged,
+                                   newF: .unchanged,
+                                   memoryChanges: [
+                                       0xFFFD: 0x34,
+                                       0xFFFE: 0x12,
+                                   ])
+    }
+
     @Test mutating func incBC() async throws {
         try await self.testProgram(program: [0x03],
                                    b: 0x12,

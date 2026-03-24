@@ -182,9 +182,11 @@ enum Opcode: UInt8 {
     case cpAWithHLIndirect = 0xBE
     case cpAWithA = 0xBF
     case retIfZeroReset = 0xC0
+    case popBC = 0xC1
     case jpImmediateIfZeroReset = 0xC2
     case jpImmediate = 0xC3
     case callImmediateIfZeroReset = 0xC4
+    case pushBC = 0xC5
     case addImmediateToA = 0xC6
     case rst00 = 0xC7
     case retIfZeroSet = 0xC8
@@ -195,8 +197,10 @@ enum Opcode: UInt8 {
     case adcImmediateToA = 0xCE
     case rst08 = 0xCF
     case retIfCarryReset = 0xD0
+    case popDE = 0xD1
     case jpImmediateIfCarryReset = 0xD2
     case callImmediateIfCarryReset = 0xD4
+    case pushDE = 0xD5
     case subImmediateFromA = 0xD6
     case rst10 = 0xD7
     case retIfCarrySet = 0xD8
@@ -205,11 +209,15 @@ enum Opcode: UInt8 {
     case callImmediateIfCarrySet = 0xDC
     case sbcImmediateFromA = 0xDE
     case rst18 = 0xDF
+    case popHL = 0xE1
+    case pushHL = 0xE5
     case andImmediateWithA = 0xE6
     case rst20 = 0xE7
     case jpHL = 0xE9
     case xorImmediateWithA = 0xEE
     case rst28 = 0xEF
+    case popAF = 0xF1
+    case pushAF = 0xF5
     case orImmediateWithA = 0xF6
     case rst30 = 0xF7
     case cpImmediateWithA = 0xFE
@@ -244,6 +252,18 @@ extension Opcode {
         case de = 0b01
         case hl = 0b10
         case sp = 0b11
+
+        init?(opcode: Opcode) {
+            let rawValue = (opcode.rawValue & 0b0011_0000) >> 4
+            self.init(rawValue: rawValue)
+        }
+    }
+
+    enum Register16StackTarget: UInt8 {
+        case bc = 0b00
+        case de = 0b01
+        case hl = 0b10
+        case af = 0b11
 
         init?(opcode: Opcode) {
             let rawValue = (opcode.rawValue & 0b0011_0000) >> 4
@@ -317,6 +337,8 @@ extension Opcode {
         case .jpHL: 1
         case .callImmediateIfZeroReset, .callImmediateIfZeroSet, .callImmediateIfCarryReset, .callImmediateIfCarrySet: 3
         case .callImmediate: 3
+        case .popBC, .popDE, .popHL, .popAF: 1
+        case .pushBC, .pushDE, .pushHL, .pushAF: 1
         case .rst00, .rst08, .rst10, .rst18, .rst20, .rst28, .rst30, .rst38: 1
         }
     }
@@ -409,6 +431,8 @@ extension Opcode {
         case .callImmediateIfCarrySet:
             f[.carry] ? 6 : 3
         case .callImmediate: 6
+        case .popBC, .popDE, .popHL, .popAF: 3
+        case .pushBC, .pushDE, .pushHL, .pushAF: 4
         case .rst00, .rst08, .rst10, .rst18, .rst20, .rst28, .rst30, .rst38: 4
         }
     }

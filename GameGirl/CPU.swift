@@ -118,6 +118,25 @@ extension CPU {
         }
     }
 
+    subscript(_ index: Opcode.Register16StackTarget) -> UInt16 {
+        mutating get {
+            switch index {
+            case .bc: return self.bc
+            case .de: return self.de
+            case .hl: return self.hl
+            case .af: return self.af
+            }
+        }
+        set {
+            switch index {
+            case .bc: self.bc = newValue
+            case .de: self.de = newValue
+            case .hl: self.hl = newValue
+            case .af: self.af = newValue
+            }
+        }
+    }
+
     subscript(_ index: Opcode.IndirectMemoryTarget) -> UInt8 {
         mutating get {
             switch index {
@@ -337,6 +356,10 @@ extension CPU {
             self.callImmediate(condition: Opcode.JumpCondition(opcode: opcode)!)
         case .callImmediate:
             self.callImmediate()
+        case .popBC, .popDE, .popHL, .popAF:
+            self.pop(to: Opcode.Register16StackTarget(opcode: opcode)!)
+        case .pushBC, .pushDE, .pushHL, .pushAF:
+            self.push(from: Opcode.Register16StackTarget(opcode: opcode)!)
         case .rst00, .rst08, .rst10, .rst18, .rst20, .rst28, .rst30, .rst38:
             self.restart(opcode: opcode)
         }
@@ -587,6 +610,22 @@ extension CPU {
             //    https://gist.github.com/SonoSooS/c0055300670d678b5ae8433e20bea595#call-a16
             self.cycles += 1
         }
+    }
+
+    mutating func pop(to: Opcode.Register16StackTarget) {
+        let oldWord = self.popStack()
+        self[to] = oldWord
+    }
+
+    mutating func push(from: Opcode.Register16StackTarget) {
+        let newWord = self[from]
+        self.pushStack(word: newWord)
+
+        // NOTA BENE: The setting of the program counter incurs an extra cycle;
+        // see the following page for details:
+        //
+        //    https://gist.github.com/SonoSooS/c0055300670d678b5ae8433e20bea595#push
+        self.cycles += 1
     }
 
     mutating func addToHL(from: Opcode.Register16Target) {
