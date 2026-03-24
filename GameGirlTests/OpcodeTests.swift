@@ -703,8 +703,8 @@ struct OpcodeTests {
         try await self.testProgram(program: [0xC4, 0x34, 0x12],
                                    f: 0x80,
                                    extraCycles: 3,
-                                   newPC: 0x1234,
-                                   newSP: .newValue(0xFFFD),
+                                   newPC: 0x0003,
+                                   newSP: .unchanged,
                                    newF: .unchanged)
     }
 
@@ -2620,6 +2620,102 @@ struct OpcodeTests {
                                    newSP: .newValue(0xFFFF),
                                    newF: .unchanged,
                                    newInterruptsEnabled: .newValue(true))
+    }
+
+    @Test mutating func rst00() async throws {
+        try await self.testProgram(program: [0xC7],
+                                   extraCycles: 4,
+                                   newPC: 0x0000,
+                                   newSP: .newValue(0xFFFD),
+                                   newF: .unchanged,
+                                   memoryChanges: [
+                                       0xFFFD: 0x01,
+                                       0xFFFE: 0x00,
+                                   ])
+    }
+
+    @Test mutating func rst08() async throws {
+        try await self.testProgram(program: [0xCF],
+                                   extraCycles: 4,
+                                   newPC: 0x0008,
+                                   newSP: .newValue(0xFFFD),
+                                   newF: .unchanged,
+                                   memoryChanges: [
+                                       0xFFFD: 0x01,
+                                       0xFFFE: 0x00,
+                                   ])
+    }
+
+    @Test mutating func rst10() async throws {
+        try await self.testProgram(program: [0xD7],
+                                   extraCycles: 4,
+                                   newPC: 0x0010,
+                                   newSP: .newValue(0xFFFD),
+                                   newF: .unchanged,
+                                   memoryChanges: [
+                                       0xFFFD: 0x01,
+                                       0xFFFE: 0x00,
+                                   ])
+    }
+
+    @Test mutating func rst18() async throws {
+        try await self.testProgram(program: [0xDF],
+                                   extraCycles: 4,
+                                   newPC: 0x0018,
+                                   newSP: .newValue(0xFFFD),
+                                   newF: .unchanged,
+                                   memoryChanges: [
+                                       0xFFFD: 0x01,
+                                       0xFFFE: 0x00,
+                                   ])
+    }
+
+    @Test mutating func rst20() async throws {
+        try await self.testProgram(program: [0xE7],
+                                   extraCycles: 4,
+                                   newPC: 0x0020,
+                                   newSP: .newValue(0xFFFD),
+                                   newF: .unchanged,
+                                   memoryChanges: [
+                                       0xFFFD: 0x01,
+                                       0xFFFE: 0x00,
+                                   ])
+    }
+
+    @Test mutating func rst28() async throws {
+        try await self.testProgram(program: [0xEF],
+                                   extraCycles: 4,
+                                   newPC: 0x0028,
+                                   newSP: .newValue(0xFFFD),
+                                   newF: .unchanged,
+                                   memoryChanges: [
+                                       0xFFFD: 0x01,
+                                       0xFFFE: 0x00,
+                                   ])
+    }
+
+    @Test mutating func rst30() async throws {
+        try await self.testProgram(program: [0xF7],
+                                   extraCycles: 4,
+                                   newPC: 0x0030,
+                                   newSP: .newValue(0xFFFD),
+                                   newF: .unchanged,
+                                   memoryChanges: [
+                                       0xFFFD: 0x01,
+                                       0xFFFE: 0x00,
+                                   ])
+    }
+
+    @Test mutating func rst38() async throws {
+        try await self.testProgram(program: [0xFF],
+                                   extraCycles: 4,
+                                   newPC: 0x0038,
+                                   newSP: .newValue(0xFFFD),
+                                   newF: .unchanged,
+                                   memoryChanges: [
+                                       0xFFFD: 0x01,
+                                       0xFFFE: 0x00,
+                                   ])
     }
 
     mutating func testProgram(program: [UInt8],

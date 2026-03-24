@@ -337,6 +337,8 @@ extension CPU {
             self.callImmediate(condition: Opcode.JumpCondition(opcode: opcode)!)
         case .callImmediate:
             self.callImmediate()
+        case .rst00, .rst08, .rst10, .rst18, .rst20, .rst28, .rst30, .rst38:
+            self.restart(opcode: opcode)
         }
     }
 
@@ -564,17 +566,6 @@ extension CPU {
     }
 
     mutating func callImmediate() {
-//        let address = self.readProgramWord()
-//
-//        self.pushStack(word: self.pc)
-//        self.pc = address
-//
-//        // NOTA BENE: The setting of the program counter incurs an extra cycle;
-//        // see the following page for details:
-//        //
-//        //    https://gist.github.com/SonoSooS/c0055300670d678b5ae8433e20bea595#call-a16
-//        self.cycles += 1
-
         self.callImmediateImpl(conditionSatisfied: true)
     }
 
@@ -784,5 +775,18 @@ extension CPU {
             //    https://gist.github.com/SonoSooS/c0055300670d678b5ae8433e20bea595#ret-cc
             self.cycles += 1
         }
+    }
+
+    mutating func restart(opcode: Opcode) {
+        let lowByte: UInt8 = opcode.rawValue & 0b0011_1000
+
+        self.pushStack(word: self.pc)
+        self.pc = Register16(highByte: 0x00, lowByte: lowByte)
+
+        // NOTA BENE: The setting of the program counter incurs an extra cycle;
+        // see the following page for details:
+        //
+        //    https://gist.github.com/SonoSooS/c0055300670d678b5ae8433e20bea595#rst-nn
+        self.cycles += 1
     }
 }

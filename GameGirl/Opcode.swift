@@ -186,27 +186,36 @@ enum Opcode: UInt8 {
     case jpImmediate = 0xC3
     case callImmediateIfZeroReset = 0xC4
     case addImmediateToA = 0xC6
+    case rst00 = 0xC7
     case retIfZeroSet = 0xC8
     case ret = 0xC9
     case jpImmediateIfZeroSet = 0xCA
     case callImmediateIfZeroSet = 0xCC
     case callImmediate = 0xCD
     case adcImmediateToA = 0xCE
+    case rst08 = 0xCF
     case retIfCarryReset = 0xD0
     case jpImmediateIfCarryReset = 0xD2
     case callImmediateIfCarryReset = 0xD4
     case subImmediateFromA = 0xD6
+    case rst10 = 0xD7
     case retIfCarrySet = 0xD8
     case retI = 0xD9
     case jpImmediateIfCarrySet = 0xDA
     case callImmediateIfCarrySet = 0xDC
     case sbcImmediateFromA = 0xDE
+    case rst18 = 0xDF
     case andImmediateWithA = 0xE6
+    case rst20 = 0xE7
     case jpHL = 0xE9
     case xorImmediateWithA = 0xEE
+    case rst28 = 0xEF
     case orImmediateWithA = 0xF6
+    case rst30 = 0xF7
     case cpImmediateWithA = 0xFE
+    case rst38 = 0xFF
 }
+
 
 extension Opcode {
     enum Register8Target: UInt8 {
@@ -308,6 +317,7 @@ extension Opcode {
         case .jpHL: 1
         case .callImmediateIfZeroReset, .callImmediateIfZeroSet, .callImmediateIfCarryReset, .callImmediateIfCarrySet: 3
         case .callImmediate: 3
+        case .rst00, .rst08, .rst10, .rst18, .rst20, .rst28, .rst30, .rst38: 1
         }
     }
 }
@@ -399,6 +409,7 @@ extension Opcode {
         case .callImmediateIfCarrySet:
             f[.carry] ? 6 : 3
         case .callImmediate: 6
+        case .rst00, .rst08, .rst10, .rst18, .rst20, .rst28, .rst30, .rst38: 4
         }
     }
 }
