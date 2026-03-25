@@ -183,6 +183,15 @@ extension CPU {
         }
     }
 
+    mutating func loadMemory(memory: [UInt16: UInt8]) {
+        // NOTA BENE: This function is also used only in the context of initializing
+        // the CPU's memory in the context of a unit test, and is _not_ intended
+        // for general use in the rest of the emulator.
+        for (address, byte) in memory {
+            self.memory[Int(address)] = byte
+        }
+    }
+
     mutating func loadStack(stack: [UInt8]) {
         // NOTA BENE: We access memory directly here in order to initially load
         // the stack in the context of initializing the CPU while running a unit test,
@@ -362,6 +371,18 @@ extension CPU {
             self.push(from: Opcode.Register16StackTarget(opcode: opcode)!)
         case .rst00, .rst08, .rst10, .rst18, .rst20, .rst28, .rst30, .rst38:
             self.restart(opcode: opcode)
+        case .ldMemoryOffsetByImmediateFromA:
+            self.ldMemoryOffsetByImmediateFromA()
+        case .ldMemoryOffsetByCFromA:
+            self.ldMemoryOffsetByCFromA()
+        case .ldMemoryFromA:
+            self.ldMemoryFromA()
+        case .ldAFromMemoryOffsetByImmediate:
+            self.ldAFromMemoryOffsetByImmediate()
+        case .ldAFromMemoryOffsetByC:
+            self.ldAFromMemoryOffsetByC()
+        case .ldAFromMemory:
+            self.ldAFromMemory()
         }
     }
 
@@ -827,5 +848,53 @@ extension CPU {
         //
         //    https://gist.github.com/SonoSooS/c0055300670d678b5ae8433e20bea595#rst-nn
         self.cycles += 1
+    }
+
+    mutating func ldMemoryOffsetByImmediateFromA() {
+        let addressOffset = self.readProgramByte()
+        let address = 0xFF00 + UInt16(addressOffset)
+
+        self.ldMemoryFromAImpl(address: address)
+    }
+
+    mutating func ldMemoryOffsetByCFromA() {
+        let address = 0xFF00 + UInt16(self.c)
+
+        self.ldMemoryFromAImpl(address: address)
+    }
+
+    mutating func ldMemoryFromA() {
+        let address = self.readProgramWord()
+
+        self.ldMemoryFromAImpl(address: address)
+    }
+
+    mutating func ldMemoryFromAImpl(address: UInt16) {
+        self.writeMemory(address: address, byte: self.a)
+    }
+
+    mutating func ldAFromMemoryOffsetByImmediate() {
+        let addressOffset = self.readProgramByte()
+        let address = 0xFF00 + UInt16(addressOffset)
+
+        self.ldAFromMemoryImpl(address: address)
+    }
+
+    mutating func ldAFromMemoryOffsetByC() {
+        let address = 0xFF00 + UInt16(self.c)
+
+        self.ldAFromMemoryImpl(address: address)
+    }
+
+    mutating func ldAFromMemory() {
+        let address = self.readProgramWord()
+
+        self.ldAFromMemoryImpl(address: address)
+    }
+
+    mutating func ldAFromMemoryImpl(address: UInt16) {
+        let value = self.readMemory(address: address)
+
+        self.a = value
     }
 }

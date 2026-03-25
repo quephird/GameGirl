@@ -209,17 +209,23 @@ enum Opcode: UInt8 {
     case callImmediateIfCarrySet = 0xDC
     case sbcImmediateFromA = 0xDE
     case rst18 = 0xDF
+    case ldMemoryOffsetByImmediateFromA = 0xE0
     case popHL = 0xE1
+    case ldMemoryOffsetByCFromA = 0xE2
     case pushHL = 0xE5
     case andImmediateWithA = 0xE6
     case rst20 = 0xE7
     case jpHL = 0xE9
+    case ldMemoryFromA = 0xEA
     case xorImmediateWithA = 0xEE
     case rst28 = 0xEF
+    case ldAFromMemoryOffsetByImmediate = 0xF0
     case popAF = 0xF1
+    case ldAFromMemoryOffsetByC = 0xF2
     case pushAF = 0xF5
     case orImmediateWithA = 0xF6
     case rst30 = 0xF7
+    case ldAFromMemory = 0xFA
     case cpImmediateWithA = 0xFE
     case rst38 = 0xFF
 }
@@ -340,6 +346,12 @@ extension Opcode {
         case .popBC, .popDE, .popHL, .popAF: 1
         case .pushBC, .pushDE, .pushHL, .pushAF: 1
         case .rst00, .rst08, .rst10, .rst18, .rst20, .rst28, .rst30, .rst38: 1
+        case .ldMemoryOffsetByImmediateFromA: 2
+        case .ldMemoryOffsetByCFromA: 1
+        case .ldMemoryFromA: 3
+        case .ldAFromMemoryOffsetByImmediate: 2
+        case .ldAFromMemoryOffsetByC: 1
+        case .ldAFromMemory: 3
         }
     }
 }
@@ -434,6 +446,12 @@ extension Opcode {
         case .popBC, .popDE, .popHL, .popAF: 3
         case .pushBC, .pushDE, .pushHL, .pushAF: 4
         case .rst00, .rst08, .rst10, .rst18, .rst20, .rst28, .rst30, .rst38: 4
+        case .ldMemoryOffsetByImmediateFromA: 3
+        case .ldMemoryOffsetByCFromA: 2
+        case .ldMemoryFromA: 4
+        case .ldAFromMemoryOffsetByImmediate: 3
+        case .ldAFromMemoryOffsetByC: 2
+        case .ldAFromMemory: 4
         }
     }
 }

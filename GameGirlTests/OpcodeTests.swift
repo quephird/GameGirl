@@ -2832,7 +2832,78 @@ struct OpcodeTests {
                                    ])
     }
 
+    @Test mutating func ldMemoryOffsetByImmediateFromA() async throws {
+        try await self.testProgram(program: [0xE0, 0x12],
+                                   a: 0x34,
+                                   extraCycles: 3,
+                                   newPC: 0x0002,
+                                   newA: .unchanged,
+                                   newF: .unchanged,
+                                   memoryChanges: [
+                                       0xFF12: 0x34,
+                                   ])
+    }
+
+    @Test mutating func ldMemoryOffsetByCFromA() async throws {
+        try await self.testProgram(program: [0xE2],
+                                   a: 0x34,
+                                   c: 0x12,
+                                   extraCycles: 2,
+                                   newPC: 0x0001,
+                                   newA: .unchanged,
+                                   newF: .unchanged,
+                                   newC: .unchanged,
+                                   memoryChanges: [
+                                       0xFF12: 0x34,
+                                   ])
+    }
+
+    @Test mutating func ldMemoryFromA() async throws {
+        try await self.testProgram(program: [0xEA, 0x34, 0x12],
+                                   a: 0x42,
+                                   extraCycles: 4,
+                                   newPC: 0x0003,
+                                   newA: .unchanged,
+                                   newF: .unchanged,
+                                   memoryChanges: [
+                                       0x1234: 0x42,
+                                   ])
+    }
+
+    @Test mutating func ldAFromMemoryOffsetByImmediate() async throws {
+        try await self.testProgram(program: [0xF0, 0x12],
+                                   memory: [0xFF12: 0x42],
+                                   extraCycles: 3,
+                                   newPC: 0x0002,
+                                   newA: .newValue(0x42),
+                                   newF: .unchanged,
+                                   memoryChanges: [:])
+    }
+
+    @Test mutating func ldAFromMemoryOffsetByC() async throws {
+        try await self.testProgram(program: [0xF2],
+                                   memory: [0xFF12: 0x42],
+                                   c: 0x12,
+                                   extraCycles: 2,
+                                   newPC: 0x0001,
+                                   newA: .newValue(0x42),
+                                   newF: .unchanged,
+                                   newC: .unchanged,
+                                   memoryChanges: [:])
+    }
+
+    @Test mutating func ldAFromMemory() async throws {
+        try await self.testProgram(program: [0xFA, 0x34, 0x12],
+                                   memory: [0x1234: 0x42],
+                                   extraCycles: 4,
+                                   newPC: 0x0003,
+                                   newA: .newValue(0x42),
+                                   newF: .unchanged,
+                                   memoryChanges: [:])
+    }
+
     mutating func testProgram(program: [UInt8],
+                              memory: [UInt16 : UInt8] = [:],
                               stack: [UInt8] = [],
                               pc: UInt16 = 0x0000,
                               sp: UInt16 = 0xFFFF,
@@ -2859,6 +2930,7 @@ struct OpcodeTests {
                               memoryChanges: [UInt16 : UInt8] = [:],
                               newInterruptsEnabled: FlagChange = .unchanged) async throws {
         self.cpu.loadProgram(program: program)
+        self.cpu.loadMemory(memory: memory)
         self.cpu.loadStack(stack: stack)
         self.cpu.pc = pc
         self.cpu.sp = sp
