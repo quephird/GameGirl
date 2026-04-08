@@ -2902,6 +2902,118 @@ struct OpcodeTests {
                                    memoryChanges: [:])
     }
 
+    @Test mutating func addImmediateToSPNoFlagsSet() async throws {
+        try await self.testProgram(program: [0xE8, 0x14],
+                                   sp: 0xFF00,
+                                   extraCycles: 4,
+                                   newPC: 0x0002,
+                                   newSP: .newValue(0xFF14),
+                                   newF: .unchanged)
+    }
+
+    @Test mutating func addImmediateToSPWithHalfCarry() async throws {
+        try await self.testProgram(program: [0xE8, 0x07],
+                                   sp: 0xFF0D,
+                                   extraCycles: 4,
+                                   newPC: 0x0002,
+                                   newSP: .newValue(0xFF14),
+                                   newF: .newValue(RegisterBit.halfCarry.value))
+    }
+
+    @Test mutating func addImmediateToSPWithCarry() async throws {
+        try await self.testProgram(program: [0xE8, 0x20],
+                                   sp: 0xFEF4,
+                                   extraCycles: 4,
+                                   newPC: 0x0002,
+                                   newSP: .newValue(0xFF14),
+                                   newF: .newValue(RegisterBit.carry.value))
+    }
+
+    @Test mutating func addImmediateToSPWithBothCarries() async throws {
+        try await self.testProgram(program: [0xE8, 0x01],
+                                   sp: 0xFFFF,
+                                   extraCycles: 4,
+                                   newPC: 0x0002,
+                                   newSP: .newValue(0x0000),
+                                   newF: .newValue(RegisterBit.carry.value | RegisterBit.halfCarry.value))
+    }
+
+    @Test mutating func addImmediateToSPWithNegativeOffset() async throws {
+        try await self.testProgram(program: [0xE8, 0xFF],
+                                   sp: 0xFF15,
+                                   extraCycles: 4,
+                                   newPC: 0x0002,
+                                   newSP: .newValue(0xFF14),
+                                   newF: .newValue(RegisterBit.carry.value | RegisterBit.halfCarry.value))
+    }
+
+    @Test mutating func ldHLFromSPPlusImmediateNoFlagsSet() async throws {
+        try await self.testProgram(program: [0xf8, 0x14],
+                                   sp: 0xFF00,
+                                   extraCycles: 3,
+                                   newPC: 0x0002,
+                                   newSP: .unchanged,
+                                   newF: .unchanged,
+                                   newH: .newValue(0xFF),
+                                   newL: .newValue(0x14))
+    }
+
+    @Test mutating func ldHLFromSPPlusImmediateHalfCarry() async throws {
+        try await self.testProgram(program: [0xF8, 0x07],
+                                   sp: 0xFF0D,
+                                   extraCycles: 3,
+                                   newPC: 0x0002,
+                                   newSP: .unchanged,
+                                   newF: .newValue(RegisterBit.halfCarry.value),
+                                   newH: .newValue(0xFF),
+                                   newL: .newValue(0x14))
+    }
+
+    @Test mutating func ldHLFromSPPlusImmediateWithCarry() async throws {
+        try await self.testProgram(program: [0xF8, 0x20],
+                                   sp: 0xFEF4,
+                                   extraCycles: 3,
+                                   newPC: 0x0002,
+                                   newSP: .unchanged,
+                                   newF: .newValue(RegisterBit.carry.value),
+                                   newH: .newValue(0xFF),
+                                   newL: .newValue(0x14))
+    }
+
+    @Test mutating func ldHLFromSPPlusImmediateWithBothCarries() async throws {
+        try await self.testProgram(program: [0xF8, 0x01],
+                                   sp: 0xFFFF,
+                                   extraCycles: 3,
+                                   newPC: 0x0002,
+                                   newSP: .unchanged,
+                                   newF: .newValue(RegisterBit.carry.value | RegisterBit.halfCarry.value),
+                                   newH: .newValue(0x00),
+                                   newL: .newValue(0x00))
+    }
+
+    @Test mutating func ldHLFromSPPlusImmediateWithNegativeOffset() async throws {
+        try await self.testProgram(program: [0xF8, 0xFF],
+                                   sp: 0xFF15,
+                                   extraCycles: 3,
+                                   newPC: 0x0002,
+                                   newSP: .unchanged,
+                                   newF: .newValue(RegisterBit.carry.value | RegisterBit.halfCarry.value),
+                                   newH: .newValue(0xFF),
+                                   newL: .newValue(0x14))
+    }
+
+    @Test mutating func ldSPFromHL() async throws {
+        try await self.testProgram(program: [0xF9],
+                                   h: 0xFF,
+                                   l: 0x14,
+                                   extraCycles: 2,
+                                   newPC: 0x0001,
+                                   newSP: .newValue(0xFF14),
+                                   newF: .unchanged,
+                                   newH: .unchanged,
+                                   newL: .unchanged)
+    }
+
     mutating func testProgram(program: [UInt8],
                               memory: [UInt16 : UInt8] = [:],
                               stack: [UInt8] = [],

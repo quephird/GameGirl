@@ -381,8 +381,14 @@ extension CPU {
             self.ldAFromMemoryOffsetByImmediate()
         case .ldAFromMemoryOffsetByC:
             self.ldAFromMemoryOffsetByC()
+        case .ldHLFromSPPlusImmediate:
+            self.ldHLFromSPPlusImmediate()
+        case .ldSPFromHL:
+            self.ldSPFromHL()
         case .ldAFromMemory:
             self.ldAFromMemory()
+        case .addImmediateToSP:
+            self.addImmediateToSP()
         }
     }
 
@@ -896,5 +902,39 @@ extension CPU {
         let value = self.readMemory(address: address)
 
         self.a = value
+    }
+
+    mutating func addImmediateToSP() {
+        let newSP = self.addImmediateToSPImpl()
+        self.sp = newSP
+
+        self.cycles += 2
+    }
+
+    mutating func ldHLFromSPPlusImmediate() {
+        let newHL = self.addImmediateToSPImpl()
+        self.hl = newHL
+
+        self.cycles += 1
+    }
+
+    mutating func addImmediateToSPImpl() -> UInt16 {
+        let value = self.readProgramByte()
+        let sp32 = Int32(self.sp)
+        let value32 = Int32(Int8(bitPattern: value))
+        let newSP = sp32 + value32
+
+        (_, self.f[.carry], self.f[.halfCarry]) = UInt8(truncatingIfNeeded: sp32).addingReportingCarries(UInt8(truncatingIfNeeded: value32))
+
+        self.f[.subtraction] = false
+        self.f[.zero] = false
+
+        return UInt16(truncatingIfNeeded: newSP)
+    }
+
+    mutating func ldSPFromHL() {
+        self.sp = self.hl
+
+        self.cycles += 1
     }
 }

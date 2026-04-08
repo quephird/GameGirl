@@ -215,6 +215,7 @@ enum Opcode: UInt8 {
     case pushHL = 0xE5
     case andImmediateWithA = 0xE6
     case rst20 = 0xE7
+    case addImmediateToSP = 0xE8
     case jpHL = 0xE9
     case ldMemoryFromA = 0xEA
     case xorImmediateWithA = 0xEE
@@ -225,6 +226,8 @@ enum Opcode: UInt8 {
     case pushAF = 0xF5
     case orImmediateWithA = 0xF6
     case rst30 = 0xF7
+    case ldHLFromSPPlusImmediate = 0xF8
+    case ldSPFromHL = 0xF9
     case ldAFromMemory = 0xFA
     case cpImmediateWithA = 0xFE
     case rst38 = 0xFF
@@ -351,7 +354,10 @@ extension Opcode {
         case .ldMemoryFromA: 3
         case .ldAFromMemoryOffsetByImmediate: 2
         case .ldAFromMemoryOffsetByC: 1
+        case .ldHLFromSPPlusImmediate: 2
+        case .ldSPFromHL: 1
         case .ldAFromMemory: 3
+        case .addImmediateToSP: 2
         }
     }
 }
@@ -451,7 +457,10 @@ extension Opcode {
         case .ldMemoryFromA: 4
         case .ldAFromMemoryOffsetByImmediate: 3
         case .ldAFromMemoryOffsetByC: 2
+        case .ldHLFromSPPlusImmediate: 3
+        case .ldSPFromHL: 2
         case .ldAFromMemory: 4
+        case .addImmediateToSP: 4
         }
     }
 }

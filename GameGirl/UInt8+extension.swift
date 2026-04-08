@@ -5,7 +5,7 @@
 //  Created by Danielle Kefford on 2/4/26.
 //
 
-extension FixedWidthInteger {
+extension UInt8 {
     func addingReportingCarries(_ rhs: Self, carry: Bool = false) -> (sum: Self, carry: Bool, halfCarry: Bool) {
         let (tempResult, tempCarry) = self.addingReportingOverflow(rhs)
         let (tempResult2, tempCarry2) = tempResult.addingReportingOverflow(Self(carry.intValue))
