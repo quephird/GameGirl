@@ -13,14 +13,14 @@ public enum RegisterBit {
 
     var bitIndex: Int {
         switch self {
-        case .carry:
-            4
-        case .halfCarry:
-            5
-        case .subtraction:
-            6
-        case .zero:
-            7
+        case .carry: 4
+        case .halfCarry: 5
+        case .subtraction: 6
+        case .zero: 7
         }
+    }
+
+    var value: UInt8 {
+        1 << self.bitIndex
     }
 }
